@@ -1,4 +1,3 @@
-
 @extends('voyager::master')
 
 @php
@@ -25,7 +24,7 @@
                     <h3> {{ $miwhats->nombre }}  <small>{{ $miwhats->codigo }}</small></h3>
                     <!-- <div class="info">{{ $miwhats->codigo }}</div> -->
                 </div>
-                <!-- <img src="{{ asset('icons/search.svg') }}" alt="" class="icon"> -->
+                <img src="{{ asset('icons/emoji.svg') }}" alt="" class="icon" onclick="return location.href='/admin/whatsapps/{{ $miwhats->id }}/edit'">
                 <img src="{{ asset('icons/status.svg') }}" alt=" Solo Estados" class="icon" onclick="miestados()">
                 <img src="{{ asset('icons/new-chat.svg') }}" alt="Todos lo chats" class="icon" onclick="michats()">
                 <!-- <img src="{{ asset('icons/filter.svg') }}" alt="" class="icon"> -->
@@ -58,7 +57,6 @@
 @section('javascript')
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         $(document).ready(async function () {
@@ -272,19 +270,7 @@
             $("#misocket").prepend("<hr style='border-top: 1px solid #2D353E;'>")
             $("#misocket").prepend("<div class='chat-message-group'><div class='chat-message'>Mostrando los ultimos "+miwhats.length+" registros del dia de hoy</div></div>") 
 
- $(".miselectevent").change(function () {
-  console.log('mierda')
-Swal.fire({
-  title: 'Error!',
-  text: 'Do you want to continue',
-  icon: 'error',
-  confirmButtonText: 'Cool'
-})
-});
-                                                                   
-        }
-
-
+           }
                                                                    
     </script>
 @stop

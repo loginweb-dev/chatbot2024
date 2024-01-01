@@ -138,10 +138,6 @@ Route::post('/socket/reset', function (Request $request) {
 Route::post('/socket/qr', function (Request $request) {
 	event(new MiEvent($request->all()));
 	$miwhats = Whatsapp::where('codigo', $request->whatsapp)->first();
-	if ($miwhats) {
-		$miwhats->qr = $request->qr;
-		$miwhats->save();
-	}
 	return true;
 });
 
@@ -190,7 +186,7 @@ Route::post('/whatsapp/listar', function (Request $request) {
 	return Evento::where('bot', $request->bot)
 	->where('created_at', '>=', date('Y-m-d'))
 	->orderBy('created_at', 'desc')
-	->with('cliente', 'grupo', 'miauthor')
+	// ->with('cliente', 'grupo', 'miauthor')
 	->take(15)
 	->get();
 });
