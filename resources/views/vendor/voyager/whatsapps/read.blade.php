@@ -24,7 +24,12 @@
                     <h3> {{ $miwhats->nombre }}  <small>{{ $miwhats->codigo }}</small></h3>
                     <!-- <div class="info">{{ $miwhats->codigo }}</div> -->
                 </div>
-                <img src="{{ asset('icons/emoji.svg') }}" alt="" class="icon" onclick="return location.href='/admin/whatsapps/{{ $miwhats->id }}/edit'">
+                @if(!$miwhats->estado)
+                    <img src="{{ asset('icons/1F625.svg') }}" alt="" class="icon">
+                @else
+                    <img src="{{ asset('icons/emoji.svg') }}" alt="" class="icon">
+                @endif
+                <img src="{{ asset('icons/E25D.svg') }}" alt="" class="icon"  onclick="return location.href='/admin/whatsapps/{{ $miwhats->id }}/edit'">
                 <img src="{{ asset('icons/status.svg') }}" alt=" Solo Estados" class="icon" onclick="miestados()">
                 <img src="{{ asset('icons/new-chat.svg') }}" alt="Todos lo chats" class="icon" onclick="michats()">
                 <!-- <img src="{{ asset('icons/filter.svg') }}" alt="" class="icon"> -->
@@ -68,16 +73,16 @@
         });
 
          
-        var beat = new Audio("{{ asset('success.mp3') }}");
 
         window.Echo.channel('messages')
             .listen('MiEvent', async (e) => {  
+                // console.log(e.message)
                 var miwhats = e.message
                 if (miwhats.bot == "{{ $miwhats->codigo }}") {
                     var milink = "{{ asset('storage') }}" 
                     milink = milink+"/"+miwhats.file
                     $("#misocket").prepend("<hr style='border-top: 1px solid #2D353E;'>")
-              
+                    console.log(e.message)
                     if (miwhats.mensaje) {
                         var messages = miwhats.mensaje
                         for(var i=0; i< messages.length; i++) {

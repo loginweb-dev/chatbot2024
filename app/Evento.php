@@ -23,9 +23,9 @@ class Evento extends Model
 		return date("Y-m-d H:i:s", $this->attributes['whatsapp']);
 	}
 
-	public function cliente()
+	public function contacto()
     {
-        return $this->belongsTo(Cliente::class, 'desde', 'whatsapp');
+        return $this->belongsTo(Contacto::class, 'desde', '_serialized');
     }
 	public function grupo()
     {
@@ -33,6 +33,6 @@ class Evento extends Model
     }
 	public function miauthor()
     {
-        return $this->belongsTo(Cliente::class, 'author', 'whatsapp');
+        return $this->belongsTo(Contacto::class, 'author', '_serialized');
     }
 }

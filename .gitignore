@@ -7,7 +7,9 @@
 /public/bots/.wwebjs_auth
 /public/bots/.wwebjs_cache
 /public/bots/node_modules
+/public/bots/.env
 
+.env
 .env.backup
 .phpunit.result.cache
 docker-compose.override.yml
@@ -17,3 +19,4 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+

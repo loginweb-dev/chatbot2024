@@ -17,21 +17,23 @@ app.use(express.json())
 app.use(cors())
 // app.use(express.urlencoded({ extended: true }))
 
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT, async () => {
     sessionstorage.clear()
+    await axios.post(process.env.DOMINIO+'reset')
+    console.log('iniciando el serverbot...')
     console.log('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.PORT);
 });
 
-// app.get('/', async (req, res) => {
-//     res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.PORT)
-// });
+app.get('/', async (req, res) => {
+    res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.PORT)
+});
 // app.get('/', (req, res) => res.redirect('/face_detection'))
 // app.get('/face_detection', (req, res) => res.sendFile(path.join(viewsDir, 'faceDetection.html')))
 
-(async function() {
-	console.log('iniciando el serverbot...')
-    await axios.post(process.env.DOMINIO+'reset')
-})();
+// (async function() {
+// 	console.log('iniciando el serverbot...')
+//     await axios.post(process.env.DOMINIO+'reset')
+// })();
 
 app.post('/init', async (req, res) => {
     console.log(req.query)

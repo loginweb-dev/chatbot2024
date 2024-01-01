@@ -99,7 +99,7 @@ Route::post('/socket/evento', function (Request $request) {
 				'subtype' => $request->subtype,
 				'whatsapp'=> $request->whatsapp
 			]);		
-			$mievent =  Evento::where('id', $mienveto->id)->with('cliente', 'grupo', 'miauthor')->first();
+			$mievent =  Evento::where('id', $mienveto->id)->with('contacto', 'grupo', 'miauthor')->first();
 			event(new MiEvent($mievent));
 		}else{
 			event(new MiEvent([
@@ -122,7 +122,7 @@ Route::post('/socket/evento', function (Request $request) {
 		return true;
 	} catch (Exception $e) {
 		event(new MiEvent([
-			'error' => 'evento'
+			'error' => $e
 		]));
 		return $e;
 	}
@@ -186,7 +186,7 @@ Route::post('/whatsapp/listar', function (Request $request) {
 	return Evento::where('bot', $request->bot)
 	->where('created_at', '>=', date('Y-m-d'))
 	->orderBy('created_at', 'desc')
-	// ->with('cliente', 'grupo', 'miauthor')
+	->with('contacto', 'grupo', 'miauthor')
 	->take(15)
 	->get();
 });
@@ -195,7 +195,7 @@ Route::post('/whatsapp/chats', function (Request $request) {
 	return Evento::where('bot', $request->codigo)
 	->where('created_at', '>=', date('Y-m-d'))
 	->orderBy('created_at', 'desc')
-	->with('cliente', 'grupo', 'miauthor')
+	->with('contacto', 'grupo', 'miauthor')
 	->get();
 });
 
@@ -204,7 +204,7 @@ Route::post('/whatsapp/estados', function (Request $request) {
 		->where('created_at', '>=', date('Y-m-d'))
 		->where('desde', 'status@broadcast')
 		->orderBy('created_at', 'desc')
-		->with('cliente', 'grupo', 'miauthor')
+		->with('contacto', 'grupo', 'miauthor')
 		->get();
 });
 
@@ -213,7 +213,7 @@ Route::post('/whatsapp/grupo', function (Request $request) {
 		->where('created_at', '>=', date('Y-m-d'))
 		->where('tipo', 'chat_group')
 		->orderBy('created_at', 'desc')
-		->with('cliente', 'grupo', 'miauthor')
+		->with('contacto', 'grupo', 'miauthor')
 		->get();
 });
 
@@ -223,7 +223,7 @@ Route::post('/whatsapp/grupo2', function (Request $request) {
 		->where('tipo', 'chat_multimedia')
 		->where('subtipo', 'chat_group')
 		->orderBy('created_at', 'desc')
-		->with('cliente', 'grupo', 'miauthor')
+		->with('contacto', 'grupo', 'miauthor')
 		->get();
 });
 
