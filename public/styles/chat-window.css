@@ -1,0 +1,126 @@
+
+/* img {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+  width: 50%<;
+} */
+
+#chat-window {
+  flex-grow: 2;
+
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  /* background: url(../images/chat-bg.png); */
+    /* height: 100%;  */
+}
+
+#chat-window-header {
+  color: white;
+  display: flex;
+  align-items: center;
+  /* column-gap: 12px; */
+  height: var(--header-height);
+  /* padding: 15px 20px; */
+  padding-left: 10px;
+  background-color: var(--primary);
+}
+
+.contact-menu {
+  position: absolute;
+  right: 15px;
+}
+
+#active-chat-details {
+  flex-grow: 1;
+  padding: 10px;
+}
+
+#chat-window-contents {
+  flex-grow: 1;
+  position: relative;
+  z-index: 1;
+  overflow: auto;
+  padding: 10px;
+  /* height: 70%;  */
+}
+
+/* #chat-window-contents::before {
+  content: "";
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.9);
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+} */
+
+#compose-chat-box {
+  margin: 0px 10px;
+  background-color: var(--compose-bg-color);
+  padding-left: 12px;
+  font-size: 16px;
+}
+
+#chat-window-footer {
+  display: flex;
+  /* column-gap: 10px; */
+  height: 62px;
+  width: 100%;
+  padding: 10px 25px;
+  background-color: var(--primary);
+}
+
+#active-chat-details > .info {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.datestamp-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.datestamp {
+  color: var(--text-primary-strong);
+  font-size: 14px;
+  background-color: var(--green);
+  border-radius: var(--border-radius);
+  padding: 8px 10px;
+  margin: 13px 0px;
+}
+
+.datestamp2 {
+  color: var(--text-primary-strong);
+  font-size: 14px;
+  background-color: var(--primary);
+  border-radius: var(--border-radius);
+  padding: 8px 10px;
+  margin: 13px 0px;
+}
+
+.scroll-to-top-button {
+  border-radius: 50%;
+  height: 42px;
+  width: 42px;
+  background-color: var(--primary);
+  position: absolute;
+  bottom: 80px;
+  right: 20px;
+  transition: all 0.1s ease-in-out;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.scroll-to-top-button-icon {
+  height: 35px;
+  width: 35px;
+}
+
+.shrink {
+  height: 0;
+  width: 0;
+}
