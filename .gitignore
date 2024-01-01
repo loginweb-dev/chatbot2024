@@ -4,8 +4,6 @@
 /storage/*.key
 /vendor.wwebjs_auth
 
-
-
 /public/bots/.wwebjs_auth
 /public/bots/.wwebjs_cache
 /public/bots/node_modules
