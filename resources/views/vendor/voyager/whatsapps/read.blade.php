@@ -156,9 +156,7 @@
                             break;
                         default:
                             break;
-                    }                    
-                
-                                                                   
+                    }                                  
                }
             })
         
@@ -199,16 +197,19 @@
                 switch (miwhats[index].tipo) {
                     case "chat_multimedia":
                         // console.log(miwhats[index])
-                        switch (miwhats[index].subtipo) {
-                            
+                        switch (miwhats[index].subtipo) {                            
                             case 'chat_private':
-                                var micliente = miwhats[index].micliente ? miwhats[index].micliente.nombre : miwhats[index].desde
-                                $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+micliente+"<select class='form-control miselectevent'><option><< Acciones >></option><option>Enviar Mensaje</option></select></span></div>")
+                                var micontacto = miwhats[index].contacto ? miwhats[index].contacto.name : miwhats[index].desde
+                                $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+micontacto+"</span></div>")
                                 break;
                             case 'chat_group':
                                     var miauthor = miwhats[index].miauthor ? miwhats[index].miauthor.nombre : miwhats[index].author;
                                     var migrupo = miwhats[index].grupo ? miwhats[index].grupo.nombre : miwhats[index].desde
-                                    $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+migrupo+" | "+miauthor+"<select class='form-control miselectevent'><option><< Acciones >></option><option>Enviar Mensaje</option></select></span></div>")
+                                    $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+migrupo+" | "+miauthor+"</span></div>")
+                                break;
+                            case 'status':
+                                var micontacto = miwhats[index].contacto ? miwhats[index].contacto.name : miwhats[index].desde
+                                $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+micontacto+"</span></div>")
                                 break;
                             default:
                                 break;
@@ -231,8 +232,8 @@
                     case "chat_location":
                         switch (miwhats[index].subtipo) {
                             case 'chat_private':
-                                var micliente = miwhats[index].micliente ? miwhats[index].micliente.nombre : miwhats[index].desde                                    
-                                $("#misocket").append("<div class='datestamp-container'><span class='datestamp'>"+micliente+"</span></div>")                   
+                                var micontacto = miwhats[index].contacto ? miwhats[index].contacto.name : miwhats[index].desde                                    
+                                $("#misocket").append("<div class='datestamp-container'><span class='datestamp'>"+micontacto+"</span></div>")                   
                                 break;
                             case 'chat_group':
                                 var miauthor = miwhats[index].miauthor ? miwhats[index].miauthor.nombre : miwhats[index].author;
@@ -247,8 +248,8 @@
                         $("#misocket").append("<div class='chat-message-group'><div class='chat-message'><a href='https://maps.google.com/?ll="+milanlog.latitude+","+milanlog.longitude+"' target='_blank'>? IR AL MAPA</a><span class='chat-message-time'>"+miwhats[index].published+"</span></div></div>")                                                     
                         break;
                     case "chat_private":             
-                        var micliente = miwhats[index].micliente ? miwhats[index].micliente.nombre : miwhats[index].desde                                    
-                        $("#misocket").append("<div class='datestamp-container'><span class='datestamp'>"+micliente+"</span></div>")
+                        var micontacto = miwhats[index].contacto ? miwhats[index].contacto.name : miwhats[index].desde                                    
+                        $("#misocket").append("<div class='datestamp-container'><span class='datestamp'>"+micontacto+"</span></div>")
                         break;
                     case "chat_group":
                         var miauthor = miwhats[index].miauthor ? miwhats[index].miauthor.nombre : miwhats[index].author;

@@ -200,9 +200,9 @@ Route::post('/whatsapp/chats', function (Request $request) {
 });
 
 Route::post('/whatsapp/estados', function (Request $request) {
-	return Evento::where("bot", $request->whasapp)
+	return Evento::where("bot", $request->codigo)
 		->where('created_at', '>=', date('Y-m-d'))
-		->where('desde', 'status@broadcast')
+		->where('subtipo', 'status')
 		->orderBy('created_at', 'desc')
 		->with('contacto', 'grupo', 'miauthor')
 		->get();
