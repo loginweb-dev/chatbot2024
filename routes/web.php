@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -18,15 +19,20 @@ Route::get('/', function () {
 });
 
 
-Route::get('/clear', function () {
-    App\Evento::truncate();
-    App\Contacto::truncate();
-	return redirect('/admin');
-});
+
 // Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('users.index');
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
+    Route::get('/clear', function () {
+        // return asset('storage/mi-whatsapp-01');
+        App\Evento::truncate();
+        App\Contacto::truncate();
+        App\Grupo::truncate();
+        Storage::disk('public')->deleteDirectory('mi-whatsapp-01');
+        Storage::disk('public')->deleteDirectory('qr');
+        return redirect('/admin/whatsapps');
+    });
 });
 
 // Auth::routes();

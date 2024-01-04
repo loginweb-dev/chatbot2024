@@ -29,7 +29,7 @@
                 @else
                     <img src="{{ asset('icons/emoji.svg') }}" alt="" class="icon">
                 @endif
-                <img src="{{ asset('icons/E256.svg') }}" alt="Contactos" class="icon" onclick="micontactos()">
+                <img src="{{ asset('icons/E256.svg') }}" alt="Contactos" class="icon" data-toggle="modal" data-target="#myModal">
                 <img src="{{ asset('icons/E25D.svg') }}" alt="" class="icon"  onclick="return location.href='/admin/whatsapps/{{ $miwhats->id }}/edit'">
                 <img src="{{ asset('icons/status.svg') }}" alt=" Solo Estados" class="icon" onclick="miestados()">
                 <img src="{{ asset('icons/new-chat.svg') }}" alt="Todos lo chats" class="icon" onclick="michats()">
@@ -58,6 +58,27 @@
         </section>            
     </main>
 
+
+
+<!-- Modal -->
+<div class="modal fade modal-primary" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @stop
 
 @section('javascript')
@@ -66,18 +87,20 @@
 
     <script>
         $(document).ready(async function () {
+            // $('#myModal').modal('show')
             // $("#misocket").html("<img src='{{ asset('storage/kOnzy.gif') }}'>")  
             var miwhats = await axios.post("/api/whatsapp/listar", {
                 'bot': '{{ $miwhats->codigo }}'
             })
             listar(miwhats.data)
+           
         });
 
          
 
         window.Echo.channel('messages')
             .listen('MiEvent', async (e) => {  
-                console.log(e.message)
+                // console.log(e.message)
 
                 var miwhats = e.message
                 if (miwhats.bot == "{{ $miwhats->codigo }}") {
@@ -100,7 +123,7 @@
                         case "chat_multimedia":    
                             $("#misocket").prepend("<div class='chat-message-group'><div class='chat-message'>"+miwhats.fwhats+"</div></div>")                                                   
                             if(miwhats.extension == "video/mp4") {
-                                $("#misocket").prepend("<video controls width='370'><source src='"+milink+"' type='"+miwhats.extension+"'></video>")
+                                $("#misocket").prepend("<video controls class='chat-multimedia'><source src='"+milink+"' type='"+miwhats.extension+"'></video>")
                             } else if(miwhats.extension == "audio/ogg; codecs=opus") {
                                 $("#misocket").prepend("<audio controls><source src='"+milink+"' type='"+miwhats.extension+"'></audio>")
                             } else if(miwhats.extension == "audio/mp4") {
@@ -110,15 +133,15 @@
                             } else if(miwhats.extension == "application/pdf") {
                                 $("#misocket").prepend("<iframe src='/storage/"+miwhats.file+"' style='width:50%; height:400px;'></iframe>")
                             } else {                                
-                                $("#misocket").prepend("<img class='chat-multimedia'"+milink+"' />")   
+                                $("#misocket").prepend("<img class='chat-multimedia' src='"+milink+"' />")   
                             }   
                             switch (miwhats.subtipo) {
                                 case 'chat_private':
-                                    var micliente = miwhats.micliente ? miwhats.micliente.nombre : miwhats.desde
-                                    $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+micliente+"</span></div>")
+                                    var micontacto = miwhats.contacto ? miwhats.contacto.name : miwhats.desde
+                                    $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+micontacto+"</span></div>")
                                     break;
                                 case 'chat_group':
-                                    var miauthor = miwhats.miauthor ? miwhats.miauthor.nombre : miwhats.author;
+                                    var miauthor = miwhats.miauthor ? miwhats.miauthor.name : miwhats.author;
                                     var migrupo = miwhats.grupo ? miwhats.grupo.nombre : miwhats.desde
                                     $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+migrupo+" | "+miauthor+"</span></div>")
                                     break;
@@ -145,8 +168,8 @@
                             $("#misocket").prepend("<div class='chat-message-group'><div class='chat-message'><a href='https://maps.google.com/?ll="+milanlog.latitude+","+milanlog.longitude+"' target='_blank'>? IR AL MAPA</a><span class='chat-message-time'>"+miwhats.published+"</span></div></div>")                                            
                             break;
                         case "chat_private":            
-                                var micliente = miwhats.micliente ? miwhats.micliente.nombre : miwhats.desde
-                                $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+micliente+"</span></div>")
+                                var micontacto = miwhats.contacto ? miwhats.contacto.name : miwhats.desde
+                                $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+micontacto+"</span></div>")
                             break;
                         case "chat_group":
                             var miauthor = miwhats.miauthor ? miwhats.miauthor.nombre : miwhats.author;
@@ -176,8 +199,13 @@
 
         
         
+        
+        
+        
+        
         async function micontactos(){
-            await axios.post("{{ env('APP_BOT') }}/contactos?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}")
+            // await axios.post("{{ env('APP_BOT') }}/contactos?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}")
+            // $('#myModal').modal('show')
         }
 
         async function miestados(){
@@ -215,14 +243,14 @@
                 
                 switch (miwhats[index].tipo) {
                     case "chat_multimedia":
-                        console.log(miwhats[index])
+                        // console.log(miwhats[index])
                         switch (miwhats[index].subtipo) {                            
                             case 'chat_private':
                                 var micontacto = miwhats[index].contacto ? miwhats[index].contacto.name : miwhats[index].desde
                                 $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+micontacto+"</span></div>")
                                 break;
                             case 'chat_group':
-                                    var miauthor = miwhats[index].miauthor ? miwhats[index].miauthor.nombre : miwhats[index].author;
+                                    var miauthor = miwhats[index].miauthor ? miwhats[index].miauthor.name : miwhats[index].author;
                                     var migrupo = miwhats[index].grupo ? miwhats[index].grupo.nombre : miwhats[index].desde
                                     $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+migrupo+" | "+miauthor+"</span></div>")
                                 break;
