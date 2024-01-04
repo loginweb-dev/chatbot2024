@@ -17,6 +17,12 @@ Route::get('/', function () {
 	return redirect('/admin');
 });
 
+
+Route::get('/clear', function () {
+    App\Evento::truncate();
+    App\Contacto::truncate();
+	return redirect('/admin');
+});
 // Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('users.index');
 
 Route::group(['prefix' => 'admin'], function () {

@@ -3,7 +3,7 @@ const axios = require('axios');
 var qr = require('qr-image');
 var path = require('path');
 const { Client, LocalAuth, MessageMedia} = require("whatsapp-web.js");
-require('dotenv').config()
+require('dotenv').config({ path: '../../.env' })
 const fs = require("fs");
 const cors = require('cors')
 const express = require('express');
@@ -18,15 +18,15 @@ app.use(express.json())
 app.use(cors())
 // app.use(express.urlencoded({ extended: true }))
 
-app.listen(process.env.PORT, async () => {
+app.listen(process.env.API_PORT, async () => {
     sessionstorage.clear()
-    await axios.post(process.env.DOMINIO+'reset')
+    await axios.post(process.env.APP_API+'reset')
     console.log('iniciando el serverbot...')
-    console.log('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.PORT);
+    console.log('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.API_PORT);
 });
 
 app.get('/', async (req, res) => {
-    res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.PORT)
+    res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.API_PORT)
 });
 
 app.post('/init', async (req, res) => {
@@ -58,7 +58,7 @@ app.post('/init', async (req, res) => {
             console.log('Nuevo QR del chatbot '+req.query.nombre+', recuerde que se genera cada 1/2 minuto')        
         })
 
-        await axios.post(process.env.DOMINIO+'evento', {
+        await axios.post(process.env.APP_API+'evento', {
             'mensaje': 'Escanea el nuevo QR',
             'tipo': 'qr',
             'bot': req.query.codigo,
@@ -71,7 +71,7 @@ app.post('/init', async (req, res) => {
         console.log('AUTHENTICATED');
         console.log('-----------------authenticated-----------------')
         try {
-            await axios.post(process.env.DOMINIO+'estado', {
+            await axios.post(process.env.APP_API+'estado', {
                 'whatsapp': req.query.codigo,
                 'estado': true
             })
@@ -84,12 +84,12 @@ app.post('/init', async (req, res) => {
     wbot.on('ready', async () => {
         console.log('-----------------ready-----------------')
         try {
-            await axios.post(process.env.DOMINIO+'evento', {
+            await axios.post(process.env.APP_API+'evento', {
                 'mensaje': 'Bot *'+req.query.nombre+'* esta linea',
                 'tipo': 'ready',
                 'bot': req.query.codigo
             })
-            await axios.post(process.env.DOMINIO+'estado', {
+            await axios.post(process.env.APP_API+'estado', {
                 'bot': req.query.codigo,
                 'estado': true
             })
@@ -165,7 +165,7 @@ app.post('/init', async (req, res) => {
                                 break;
                         }
                 
-                        await axios.post(process.env.DOMINIO+'evento', {
+                        await axios.post(process.env.APP_API+'evento', {
                             'clase': 'input',
                             'mensaje': msg.body,
                             'tipo': 'chat_multimedia',
@@ -185,7 +185,7 @@ app.post('/init', async (req, res) => {
                     const r = (Math.random() + 1).toString(36).substring(9);
                     fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.jpeg', imgBuffer);
                     var mifile = req.query.nombre+'/'+r+'.jpeg'
-                    await axios.post(process.env.DOMINIO+'evento', {
+                    await axios.post(process.env.APP_API+'evento', {
                         'clase': 'input',
                         'tipo': 'chat_location',
                         'datos': msg.location,
@@ -197,7 +197,7 @@ app.post('/init', async (req, res) => {
                         'whatsapp': msg.timestamp
                     })
                 }else{
-                    await axios.post(process.env.DOMINIO+'evento', {
+                    await axios.post(process.env.APP_API+'evento', {
                         'clase': 'input',
                         'mensaje': msg.body,
                         'tipo': mitipo,
@@ -211,7 +211,7 @@ app.post('/init', async (req, res) => {
             }
         } catch (error) {
             console.log(error)   
-            await axios.post(process.env.DOMINIO+'evento', {
+            await axios.post(process.env.APP_API+'evento', {
                 'clase': 'input',
                 'tipo': 'error',
                 'bot': req.query.codigo,
@@ -235,7 +235,7 @@ app.post('/init', async (req, res) => {
                 console.log(media)
                 let r = (Math.random() + 1).toString(36).substring(7);
                 let mifile = null            
-                var mimediadata = media.data ? media.data : null
+                var mimediadata = media ? media.data : null
                 const imgBuffer = Buffer.from(mimediadata, 'base64');
                 if (!fs.existsSync('../storage/'+req.query.nombre)){
                     fs.mkdirSync('../storage/'+req.query.nombre);
@@ -258,7 +258,7 @@ app.post('/init', async (req, res) => {
                         mifile = req.query.nombre+'/'+r
                         break;
                 }
-                await axios.post(process.env.DOMINIO+'evento', {
+                await axios.post(process.env.APP_API+'evento', {
                     'clase': 'input',
                     'mensaje': msg.body,
                     'tipo': 'chat_multimedia',
@@ -285,7 +285,7 @@ app.post('/init', async (req, res) => {
     });
     wbot.initialize();
 
-    res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.PORT)
+    res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.API_PORT)
 });
 
 
@@ -295,15 +295,21 @@ app.post('/stop', async (req, res) => {
         var miwbot = sessionstorage.getItem(req.query.nombre)
         miwbot.destroy()
         sessionstorage.removeItem(req.query.nombre)
-        await axios.post(process.env.DOMINIO+'estado', {
+        await axios.post(process.env.APP_API+'estado', {
             'bot': req.query.codigo,
             'estado': false
         })
+        await axios.post(process.env.APP_API+'evento', {
+            'clase': 'input',
+            'tipo': 'destroy',
+            'bot': req.query.codigo,
+            'whatsapp': msg.timestamp
+        })
         console.log('El bot  *'+req.query.nombre+'* fue pausado')
-        res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.PORT)
+        res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.API_PORT)
     } catch (error) {
         console.log(error)
-        res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.PORT)
+        res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.API_PORT)
     }
 });
 
@@ -323,22 +329,50 @@ app.post('/getContactById', async (req, res) => {
 
 app.post('/contactos', async (req, res) => {
     console.log(req.query)
+    
     try {    
         var miwbot = sessionstorage.getItem(req.query.nombre)
         const contacts = await miwbot.getContacts();
-        // console.log(contacts)
-        // var midata = await axios.post(process.env.DOMINIO+'contactos', {
-        //     'datos': contacts,
-        //     'bot': req.query.bot,
-        // })
-        for (let index = 0; index < 4000; index++) {
-            // const element = array[index];
-            
-            
+
+        for (let index = 0; index < contacts.length; index++) {
+            // console.log(msg)
+            if (contacts[index].isMyContact) {                          
+                var mirest = await axios.post(process.env.APP_API+'contactos', {
+                    'midata': contacts[index],
+                    'bot': req.query.codigo,
+                    '_id': contacts[index].id,
+                    'number': contacts[index].number,
+                    'avatar': null,
+                    'tipo': 'contactos'
+                })   
+                // console.log(mirest.data)
+                const url = await contacts[index].getProfilePicUrl();
+                if (url) {
+                    const response = await axios.get(url, { responseType: 'arraybuffer' })
+                    let r = (Math.random() + 1).toString(36).substring(7)
+                    var mifile = '../storage/'+req.query.nombre+'/'+r+'.jpeg'
+                    if (!fs.existsSync('../storage/'+req.query.nombre)){
+                        fs.mkdirSync('../storage/'+req.query.nombre);
+                    }
+                    fs.writeFile(mifile, response.data, (err) => {
+                        if (err) throw err;
+                        console.log('Image downloaded successfully!');
+                    });
+                    var mirest = await axios.post(process.env.APP_API+'contactos', {
+                        'midata': contacts[index],
+                        'bot': req.query.codigo,
+                        '_id': contacts[index].id,
+                        'number': contacts[index].number,
+                        'avatar': req.query.nombre+'/'+r+'.jpeg',
+                        'tipo': 'contactos'
+                    })   
+                    console.log(mirest.data)
+                }
+            }
         }
-        var midata = await axios.post(process.env.DOMINIO+'contactos', )
-        console.log(midata.data)
-        res.send(midata.data)
+
+        console.log(contacts.length)   
+        res.send(true)
     } catch (error) {
         console.log(error)
     }

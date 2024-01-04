@@ -412,19 +412,13 @@
                 }
             })
 
-            async function miestado(miestado, minombre, micodigo, id){
-
-                if (!miestado) {
-
-                    await axios.post("{{ env('APP_BOT') }}/init?nombre="+minombre+"&codigo="+micodigo)  
-
-                } 
-                else {
-
-                    await axios.post("{{ env('APP_BOT') }}/stop?nombre="+minombre+"&codigo="+micodigo) 
-
-                }
-                // location.href= '/admin/whatsapps/'+id
+        async function miestado(miestado, minombre, micodigo, id){
+            if (!miestado) {
+                await axios.post("{{ env('APP_BOT') }}/init?nombre="+minombre+"&codigo="+micodigo)  
+            } 
+            else {
+                await axios.post("{{ env('APP_BOT') }}/stop?nombre="+minombre+"&codigo="+micodigo) 
             }
+        }
     </script>
 @stop

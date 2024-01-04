@@ -4,6 +4,8 @@
   align-items: flex-start;
   column-gap: 8px;
   margin-bottom: 10px;
+  justify-content: center;
+  align-items: center;
 }
 
 .emoji-toolbar {
@@ -55,7 +57,17 @@
   background-color: var(--primary);
   border-radius: var(--border-radius);
   /* position: relative; */
-  width: 50%;
+  width: 98%;
+}
+
+.chat-multimedia {
+  justify-content: center;
+  align-items: center;
+  width: 70%;
+  text-align: center;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .chat-message2 {

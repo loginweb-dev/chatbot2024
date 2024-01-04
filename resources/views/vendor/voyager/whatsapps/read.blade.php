@@ -29,6 +29,7 @@
                 @else
                     <img src="{{ asset('icons/emoji.svg') }}" alt="" class="icon">
                 @endif
+                <img src="{{ asset('icons/E256.svg') }}" alt="Contactos" class="icon" onclick="micontactos()">
                 <img src="{{ asset('icons/E25D.svg') }}" alt="" class="icon"  onclick="return location.href='/admin/whatsapps/{{ $miwhats->id }}/edit'">
                 <img src="{{ asset('icons/status.svg') }}" alt=" Solo Estados" class="icon" onclick="miestados()">
                 <img src="{{ asset('icons/new-chat.svg') }}" alt="Todos lo chats" class="icon" onclick="michats()">
@@ -76,7 +77,8 @@
 
         window.Echo.channel('messages')
             .listen('MiEvent', async (e) => {  
-                // console.log(e.message)
+                console.log(e.message)
+
                 var miwhats = e.message
                 if (miwhats.bot == "{{ $miwhats->codigo }}") {
                     var milink = "{{ asset('storage') }}" 
@@ -108,7 +110,7 @@
                             } else if(miwhats.extension == "application/pdf") {
                                 $("#misocket").prepend("<iframe src='/storage/"+miwhats.file+"' style='width:50%; height:400px;'></iframe>")
                             } else {                                
-                                $("#misocket").prepend("<img style='width: 50%' src='"+milink+"' />")   
+                                $("#misocket").prepend("<img class='chat-multimedia'"+milink+"' />")   
                             }   
                             switch (miwhats.subtipo) {
                                 case 'chat_private':
@@ -152,14 +154,31 @@
                             $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+migrupo+" | "+miauthor+"</span></div>")
                             break;
                         case "qr":            
-                                 $("#misocket").prepend("<img style='width: 50%' src='"+milink+"' />") 
+                            $("#misocket").prepend("<img style='width: 50%' src='"+milink+"' />") 
                             break;
+                        case "ready":            
+                            location.reload()
+                        case "destroy":            
+                            location.reload()
+                            break;
+                        case "contactos":   
+                            if (miwhats.file) {
+                                $("#misocket").prepend("<img class='chat-multimedia' src='"+milink+"' />")
+                            }         
+                            
+                            break;                              
                         default:
                             break;
                     }                                  
                }
             })
         
+
+        
+        
+        async function micontactos(){
+            await axios.post("{{ env('APP_BOT') }}/contactos?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}")
+        }
 
         async function miestados(){
             var miwhats = await axios.post("/api/whatsapp/estados", {
@@ -196,7 +215,7 @@
                 
                 switch (miwhats[index].tipo) {
                     case "chat_multimedia":
-                        // console.log(miwhats[index])
+                        console.log(miwhats[index])
                         switch (miwhats[index].subtipo) {                            
                             case 'chat_private':
                                 var micontacto = miwhats[index].contacto ? miwhats[index].contacto.name : miwhats[index].desde
@@ -268,7 +287,7 @@
                             .replace(/\*(.*)\*/, "<strong>$1</strong>")
                     }
                     messages = messages.replace(/(\b(https?|):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, "<a href='$1' target='_blank'>$1</a>");
-                    $("#misocket").append("<div class='chat-message-group'><div class='chat-message'>"+messages+"<span class='chat-message-time'>"+miwhats[index].fwhats+"</span></div></div>") 
+                    $("#misocket").append("<div class='chat-message-group text-center'><div class='chat-message'>"+messages+"<span class='chat-message-time'>"+miwhats[index].fwhats+"</span></div></div>") 
 
                 }
                 $("#misocket").append("<hr style='border-top: 1px solid #2D353E;'>")

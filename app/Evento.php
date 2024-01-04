@@ -23,9 +23,13 @@ class Evento extends Model
 		return date("Y-m-d H:i:s", $this->attributes['whatsapp']);
 	}
 
+	// public function getContactoAttribute(){
+	// 	return $this->attributes['number'].'@c.us';
+	// }
+
 	public function contacto()
     {
-        return $this->belongsTo(Contacto::class, 'desde', '_serialized');
+        return $this->belongsTo(Contacto::class, 'desde', 'codigo');
     }
 	public function grupo()
     {
@@ -33,6 +37,6 @@ class Evento extends Model
     }
 	public function miauthor()
     {
-        return $this->belongsTo(Contacto::class, 'author', '_serialized');
+        return $this->belongsTo(Contacto::class, 'author', 'codigo');
     }
 }

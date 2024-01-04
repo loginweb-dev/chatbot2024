@@ -9,6 +9,7 @@ use App\Grupo;
 use App\Evento;
 use App\Whatsapp;
 use App\Contacto;
+use Illuminate\Support\Facades\DB;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -25,39 +26,39 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/socket/contactos', function (Request $request) {
+	// return $request->avatar;
 	try {		
-		// return $request->bot;
-		// $midata =  json_decode(stripslashes($request->all()), true);
-		$midata = json_decode($request->datos, true);
-		// return $midata;
-		// foreach ($variable as $key => $value) {
-		// 	# code...
-		// }
-		// foreach ($midata as $key => $value) {
-			# code...
-		// return  $request->datos;
-		// for ($i=0; $i < ; $i++) { 
-foreach ($midata as $value) {
-	# code...
-	// $miaux = json_encode($value, true);
-	return $value;
-}
-		// 	$miitem =  json_encode($value);
-		// 	return $value->number;
-		// 	$micliente = Contacto::where('number', $value->number)->where('bot', $request->bot)->first();
-		// 	if(!$micliente){
-		// 		$micliente = Cliente::create([
-		// 			'nombre'=> $request->nombre,
-		// 			'whatsapp' => $request->from,
-		// 			'tipo' => 'Nuevo',
-		// 			'bot' => $request->bot
-		// 		]);
-		// 	}	
-		// }
-		return true;
+		$mifind = Contacto::where('number', $request->number)->where('bot', $request->bot)->first();
+		if ($mifind) {
+			$mifind->name = $request->midata["name"];
+			$mifind->shortName = $request->midata["shortName"];
+			$mifind->isBusiness = $request->midata["isBusiness"];
+			$mifind->isBlocked = $request->midata["isBlocked"];
+			$mifind->bot = $request->bot;
+			$mifind->_id = $request->_id;
+			$mifind->avatar = $request->avatar;
+			$mifind->save();
+		}else{
+			$micpontato = Contacto::create($request->midata);
+			$micpontato->bot = $request->bot;
+			$micpontato->_id = $request->_id;
+			$micpontato->avatar = $request->avatar;
+			$micpontato->codigo = $request->midata["id"]["_serialized"];
+			$micpontato->save();
+		}
+		event(new MiEvent([
+			'mensaje'=> "Se agrego o actualizo el contacto ".$request->midata["name"]. ", con el numero  ".$request->number,
+			'codigo' => $request->from,
+			'bot' => $request->bot,
+			'tipo' => $request->tipo,
+			'file' => $request->avatar ? $request->avatar : null,
+			'fwhats' => date('Y-m-d H:i:s')
+		]));
+		
+		return $request->avatar;
     } catch (Exception $e) {
 		event(new MiEvent([
-			'error' => 'cliente'
+			'error' => 'contacto'
 		]));
     	return $e;
 	}
