@@ -12,13 +12,11 @@ var sessionstorage = require('sessionstorage');
 const YTDlpWrap = require('yt-dlp-wrap').default;
 const ytDlpWrap = new YTDlpWrap('/usr/local/bin/yt-dlp');
 
-const { get } = require('request');
-const { log } = require('console');
 
 const app = express();
 app.use(express.json())
 app.use(cors())
-// app.use(express.urlencoded({ extended: true }))
+
 
 app.listen(process.env.API_PORT, async () => {
     sessionstorage.clear()
