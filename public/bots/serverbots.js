@@ -9,6 +9,8 @@ const cors = require('cors')
 const express = require('express');
 var sessionstorage = require('sessionstorage');
 
+const YTDlpWrap = require('yt-dlp-wrap').default;
+const ytDlpWrap = new YTDlpWrap('/usr/local/bin/yt-dlp');
 
 const { get } = require('request');
 const { log } = require('console');
@@ -228,11 +230,9 @@ app.post('/init', async (req, res) => {
         
         if (msg.from == "status@broadcast") {
             console.log(msg)
-            if (msg.hasMedia ) {
-                
-        
+            if (msg.hasMedia ) {                        
                 const media = await msg.downloadMedia(); 
-                console.log(media)
+                // console.log(media)
                 let r = (Math.random() + 1).toString(36).substring(7);
                 let mifile = null            
                 var mimediadata = media ? media.data : null
@@ -254,8 +254,8 @@ app.post('/init', async (req, res) => {
                         mifile = req.query.nombre+'/'+r+'.mp4'
                         break;
                     default:
-                        fs.writeFileSync('../storage/'+req.query.nombre+'/'+r, imgBuffer);
-                        mifile = req.query.nombre+'/'+r
+                        // fs.writeFileSync('../storage/'+req.query.nombre+'/'+r, imgBuffer);
+                        // mifile = req.query.nombre+'/'+r
                         break;
                 }
                 await axios.post(process.env.APP_API+'evento', {
@@ -267,10 +267,11 @@ app.post('/init', async (req, res) => {
                     'bot': req.query.codigo,
                     'desde': msg.author,
                     'author': msg.author,
-                    'whatsapp': msg.timestamp
+                    'whatsapp': msg.timestamp,
+                    'extension': media.mimetype
                 })
             }else{
-                console-log(msg)
+                console.log(msg)
             }
    
         }
@@ -281,6 +282,54 @@ app.post('/init', async (req, res) => {
         if (msg.fromMe) {
             // do stuff here
             console.log('message_create', msg)
+            if (msg.hasMedia ) {                        
+                const media = await msg.downloadMedia(); 
+                // console.log(media)
+                let r = (Math.random() + 1).toString(36).substring(7);
+                let mifile = null            
+                var mimediadata = media ? media.data : null
+                const imgBuffer = Buffer.from(mimediadata, 'base64');
+                if (!fs.existsSync('../storage/'+req.query.nombre)){
+                    fs.mkdirSync('../storage/'+req.query.nombre);
+                }
+                switch (media.mimetype) {
+                    case 'image/jpeg':
+                        fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.jpeg', imgBuffer);
+                        mifile = req.query.nombre+'/'+r+'.jpeg'
+                        break;
+                    case 'image/webp':
+                        fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.webp', imgBuffer);
+                        mifile = req.query.nombre+'/'+r+'.webp'
+                        break;
+                    case 'video/mp4':
+                        fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.mp4', imgBuffer);
+                        mifile = req.query.nombre+'/'+r+'.mp4'
+                        break;
+                    default:
+                        // fs.writeFileSync('../storage/'+req.query.nombre+'/'+r, imgBuffer);
+                        // mifile = req.query.nombre+'/'+r
+                        break;
+                }
+                await axios.post(process.env.APP_API+'evento', {
+                    'clase': 'output',
+                    'mensaje': msg.body,
+                    'tipo': 'chat_multimedia',
+                    'file': mifile,
+                    'bot': req.query.codigo,
+                    'whatsapp': msg.timestamp,
+                    'extension': media.mimetype
+                })
+            }else{
+                // console.log(msg)
+                await axios.post(process.env.APP_API+'evento', {
+                    'clase': 'output',
+                    'mensaje': msg.body,
+                    'tipo': 'chat_private',
+                    'bot': req.query.codigo,
+                    'whatsapp': msg.timestamp,
+                })
+            }
+
         }
     });
     wbot.initialize();
@@ -378,3 +427,45 @@ app.post('/contactos', async (req, res) => {
     }
 });
 
+
+//------------YT-DLP-----------------
+//----------------------------------
+app.post('/download', async (req, res) => {
+    console.log(req.query)
+
+    // let stdout = await ytDlpWrap.execPromise([
+    //     'https://www.youtube.com/watch?v=aqz-KE-bpKQ',
+    //     '-f',
+    //     'best',
+    //     '-o',
+    //     'output2.mp4',
+    // ]);
+    // console.log(stdout);
+
+    // fs.writeFile('../storage/'+req.query.nombre+'.mp4', imgBuffer);
+
+    let ytDlpEventEmitter = ytDlpWrap
+    .exec([
+        req.query.url,
+        '-f',
+        'best[ext=mp4]',
+        '-o',
+        '../storage/download/'+req.query.nombre+'.mp4',
+    ])
+    .on('progress', (progress) =>
+        console.log(
+            progress.percent,
+            progress.totalSize,
+            progress.currentSpeed,
+            progress.eta
+        )
+    )
+    .on('ytDlpEvent', (eventType, eventData) =>
+        console.log(eventType, eventData)
+    )
+    .on('error', (error) => console.error(error))
+    .on('close', () => console.log('all done'));
+
+    console.log(ytDlpEventEmitter.ytDlpProcess.pid);
+    res.send(true)
+});

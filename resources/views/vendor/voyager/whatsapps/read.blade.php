@@ -73,7 +73,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-primary" onclick="micontactos()">Save changes</button>
       </div>
     </div>
   </div>
@@ -145,6 +145,10 @@
                                     var migrupo = miwhats.grupo ? miwhats.grupo.nombre : miwhats.desde
                                     $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+migrupo+" | "+miauthor+"</span></div>")
                                     break;
+                                case 'status':
+                                    var micontacto = miwhats.contacto ? miwhats.contacto.name : miwhats.desde
+                                    $("#misocket").prepend("<div class='datestamp-container micontext'><span class='datestamp'>"+micontacto+"</span></div>")
+                                    break;
                                 default:
                                     break;
                             }  
@@ -204,8 +208,9 @@
         
         
         async function micontactos(){
-            // await axios.post("{{ env('APP_BOT') }}/contactos?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}")
+            await axios.post("{{ env('APP_BOT') }}/contactos?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}")
             // $('#myModal').modal('show')
+            $('#myModal').modal('hide')
         }
 
         async function miestados(){
@@ -262,7 +267,7 @@
                                 break;
                         }                                                        
                         if(miwhats[index].extension == "video/mp4") {
-                            $("#misocket").append("<video controls width='370'><source src='"+milink+"' type='"+miwhats[index].extension+"'></video>")
+                            $("#misocket").append("<video controls class='chat-multimedia'><source src='"+milink+"' type='"+miwhats[index].extension+"'></video>")
                         } else if(miwhats[index].extension == "audio/ogg; codecs=opus") {
                             $("#misocket").append("<audio controls><source src='"+milink+"' type='"+miwhats[index].extension+"'></audio>")
                         } else if(miwhats[index].extension == "audio/mp4") {
@@ -272,7 +277,7 @@
                         } else if(miwhats[index].extension == "application/pdf") {
                             $("#misocket").append("<iframe src='/storage/"+miwhats[index].file+"' style='width:50%; height:400px;'></iframe>")
                         } else {
-                            $("#misocket").append("<img style='width: 50%' src='"+milink+"' />")   
+                            $("#misocket").append("<img class='chat-multimedia' src='"+milink+"' />")   
                         }   
                         $("#misocket").append("<div class='chat-message-group'><div class='chat-message'>"+miwhats[index].fwhats+"</div></div>")     
                         break;

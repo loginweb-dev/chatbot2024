@@ -55,7 +55,8 @@ return [
     */
 
     'storage' => [
-        'disk' => 'public',
+        'disk' => 'ytdlp',
+        'disk' => 'public'
     ],
 
     /*
