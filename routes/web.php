@@ -14,27 +14,21 @@ use Illuminate\Support\Facades\Storage;
 */
 
 Route::get('/', function () {
-    // return view('welcome');
 	return redirect('/admin');
 });
-
-
-
-// Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('users.index');
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
     Route::get('/clear', function () {
-        // return asset('storage/mi-whatsapp-01');
+
         App\Evento::truncate();
         App\Contacto::truncate();
         App\Grupo::truncate();
-        Storage::disk('public')->deleteDirectory('mi-whatsapp-01');
+        $miwhats = App\Whatsapp::all();
+        foreach ($miwhats as $value) {
+            Storage::disk('public')->deleteDirectory($value->slug);
+        }        
         Storage::disk('public')->deleteDirectory('qr');
         return redirect('/admin/whatsapps');
     });
 });
-
-// Auth::routes();
-// Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-

@@ -31,6 +31,7 @@ app.get('/', async (req, res) => {
 
 app.post('/init', async (req, res) => {
     console.log(req.query)
+
     const wbot = new Client({
         authStrategy: new LocalAuth({
             clientId: req.query.nombre
@@ -45,7 +46,6 @@ app.post('/init', async (req, res) => {
         }
     });
     
-
     wbot.on('qr', async (qrwb) => {
         console.log('-----------------'+req.query.nombre+'----------------')
         if (!fs.existsSync('../storage/qr')){
@@ -68,8 +68,8 @@ app.post('/init', async (req, res) => {
     });
 
     wbot.on("authenticated", async session => {
-        console.log('AUTHENTICATED');
-        console.log('-----------------authenticated-----------------')
+        console.log('authenticated');
+        // console.log('-----------------authenticated-----------------')
         try {
             await axios.post(process.env.APP_API+'estado', {
                 'whatsapp': req.query.codigo,
@@ -78,11 +78,12 @@ app.post('/init', async (req, res) => {
         } catch (error) {
             console.log(error)
         }
-        console.log('-----------------authenticated-----------------')
+        // console.log('-----------------authenticated-----------------')
     });
     
     wbot.on('ready', async () => {
-        console.log('-----------------ready-----------------')
+        // console.log('-----------------ready-----------------')
+        console.log('ready');
         try {
             await axios.post(process.env.APP_API+'evento', {
                 'mensaje': 'Bot *'+req.query.nombre+'* esta linea',
@@ -97,7 +98,7 @@ app.post('/init', async (req, res) => {
         } catch (error) {
             console.log(error)
         }
-        console.log('-----------------ready-----------------')
+        // console.log('-----------------ready-----------------')
     });
 
     wbot.on('message', async msg => {
@@ -160,8 +161,8 @@ app.post('/init', async (req, res) => {
                                 mifile = req.query.nombre+'/'+r+'.pdf'
                                 break;
                             default:
-                                fs.writeFileSync('../storage/'+req.query.nombre+'/'+r, imgBuffer);
-                                mifile = req.query.nombre+'/'+r
+                                // fs.writeFileSync('../storage/'+req.query.nombre+'/'+r, imgBuffer);
+                                // mifile = req.query.nombre+'/'+r
                                 break;
                         }
                 
@@ -223,63 +224,59 @@ app.post('/init', async (req, res) => {
     })
 
     wbot.on('message_create', async (msg) => {
-        // Fired on all message creations, including your own
-        // console.log(req.query)
-        
         if (msg.from == "status@broadcast") {
-            console.log(msg)
+            // console.log(msg)
             if (msg.hasMedia ) {                        
                 const media = await msg.downloadMedia(); 
-                // console.log(media)
-                let r = (Math.random() + 1).toString(36).substring(7);
-                let mifile = null            
-                var mimediadata = media ? media.data : null
-                const imgBuffer = Buffer.from(mimediadata, 'base64');
-                if (!fs.existsSync('../storage/'+req.query.nombre)){
-                    fs.mkdirSync('../storage/'+req.query.nombre);
+                if (media) {   
+                    let r = (Math.random() + 1).toString(36).substring(7);
+                    let mifile = null  
+                    const imgBuffer = Buffer.from(media.data, 'base64');
+                    if (!fs.existsSync('../storage/'+req.query.nombre)){
+                        fs.mkdirSync('../storage/'+req.query.nombre);
+                    }
+                    switch (media.mimetype) {
+                        case 'image/jpeg':
+                            fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.jpeg', imgBuffer);
+                            mifile = req.query.nombre+'/'+r+'.jpeg'
+                            break;
+                        case 'image/webp':
+                            fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.webp', imgBuffer);
+                            mifile = req.query.nombre+'/'+r+'.webp'
+                            break;
+                        case 'video/mp4':
+                            fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.mp4', imgBuffer);
+                            mifile = req.query.nombre+'/'+r+'.mp4'
+                            break;
+                        default:
+                            // fs.writeFileSync('../storage/'+req.query.nombre+'/'+r, imgBuffer);
+                            // mifile = req.query.nombre+'/'+r
+                            break;
+                    }
+                    await axios.post(process.env.APP_API+'evento', {
+                        'clase': 'input',
+                        'mensaje': msg.body,
+                        'tipo': 'chat_multimedia',
+                        'subtipo': 'status',
+                        'file': mifile,
+                        'bot': req.query.codigo,
+                        'desde': msg.author,
+                        'author': msg.author,
+                        'whatsapp': msg.timestamp,
+                        'extension': media.mimetype
+                    })
                 }
-                switch (media.mimetype) {
-                    case 'image/jpeg':
-                        fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.jpeg', imgBuffer);
-                        mifile = req.query.nombre+'/'+r+'.jpeg'
-                        break;
-                    case 'image/webp':
-                        fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.webp', imgBuffer);
-                        mifile = req.query.nombre+'/'+r+'.webp'
-                        break;
-                    case 'video/mp4':
-                        fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.mp4', imgBuffer);
-                        mifile = req.query.nombre+'/'+r+'.mp4'
-                        break;
-                    default:
-                        // fs.writeFileSync('../storage/'+req.query.nombre+'/'+r, imgBuffer);
-                        // mifile = req.query.nombre+'/'+r
-                        break;
-                }
-                await axios.post(process.env.APP_API+'evento', {
-                    'clase': 'input',
-                    'mensaje': msg.body,
-                    'tipo': 'chat_multimedia',
-                    'subtipo': 'status',
-                    'file': mifile,
-                    'bot': req.query.codigo,
-                    'desde': msg.author,
-                    'author': msg.author,
-                    'whatsapp': msg.timestamp,
-                    'extension': media.mimetype
-                })
             }else{
                 console.log(msg)
             }
-   
         }
 
 
 
-        //////////////////mi sms ---------------
+        //--------------- misms ---------------
         if (msg.fromMe) {
             // do stuff here
-            console.log('message_create', msg)
+            // console.log('message_create', msg)
             if (msg.hasMedia ) {                        
                 const media = await msg.downloadMedia(); 
                 // console.log(media)
@@ -330,9 +327,9 @@ app.post('/init', async (req, res) => {
 
         }
     });
-    wbot.initialize();
 
-    res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.API_PORT)
+    wbot.initialize();
+    res.send(true)
 });
 
 
@@ -350,18 +347,19 @@ app.post('/stop', async (req, res) => {
             'clase': 'input',
             'tipo': 'destroy',
             'bot': req.query.codigo,
-            'whatsapp': msg.timestamp
+            'whatsapp': msg.timestamp,
+            'mensaje': 'El bot  *'+req.query.nombre+'* fue pausado'
         })
         console.log('El bot  *'+req.query.nombre+'* fue pausado')
-        res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.API_PORT)
     } catch (error) {
-        console.log(error)
-        res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.API_PORT)
+        console.log(error)        
     }
+    res.send(true)
 });
 
 
 app.post('/getContactById', async (req, res) => {
+    console.log(req.query)
     try {    
         var miwbot = sessionstorage.getItem(req.query.nombre)
         const ch = await miwbot.getChatById(req.query.contacto);
@@ -370,8 +368,8 @@ app.post('/getContactById', async (req, res) => {
     } catch (error) {
             console.log(error)
     }
+    res.send(true)
 });
-
 
 
 app.post('/contactos', async (req, res) => {
@@ -411,36 +409,60 @@ app.post('/contactos', async (req, res) => {
                         '_id': contacts[index].id,
                         'number': contacts[index].number,
                         'avatar': req.query.nombre+'/'+r+'.jpeg',
-                        'tipo': 'contactos'
+                        'tipo': 'contactos',
+                        'codigo': contacts[index].id._serialized
                     })   
-                    console.log(mirest.data)
+                    // console.log(mirest.data)
                 }
             }
         }
-
-        console.log(contacts.length)   
-        res.send(true)
     } catch (error) {
         console.log(error)
     }
+    res.send(true)
 });
 
 
+app.post('/historial', async (req, res) => {
+    console.log(req.query)    
+    try {    
+        var miwbot = sessionstorage.getItem(req.query.nombre)
+        const historial = await miwbot.getChats();
+        
+        for (let index = 0; index < historial.length; index++) {
+            console.log(historial[index])
+            if (historial[index].isGroup) {
+                console.log(historial[index])
+                await axios.post(process.env.APP_API+'grupos', {
+                    // 'midata': historial[index],
+                    'name': historial[index].name,
+                    'bot': req.query.codigo,
+                    'codigo': historial[index].groupMetadata.id._serialized,
+                    '_id': historial[index].id,
+                    'groupMetadata': historial[index].groupMetadata,
+                    'lastMessage': historial[index].lastMessage,
+                    'isReadOnly': historial[index].isReadOnly,
+                    'isMuted': historial[index].isMuted,
+                    'tipo': 'grupos',
+                    'owner': historial[index].groupMetadata.owner,
+                    'desc': historial[index].groupMetadata.desc,
+                    'creation': historial[index].groupMetadata.creation
+                })   
+
+                // const url = await historial[index].getProfilePicUrl();
+                // console.log(url)
+            }
+        }
+        console.log(historial.length)
+    } catch (error) {
+        console.log(error)
+    }
+    res.send(true)
+});
 //------------YT-DLP-----------------
 //----------------------------------
 app.post('/download', async (req, res) => {
     console.log(req.query)
-
-    // let stdout = await ytDlpWrap.execPromise([
-    //     'https://www.youtube.com/watch?v=aqz-KE-bpKQ',
-    //     '-f',
-    //     'best',
-    //     '-o',
-    //     'output2.mp4',
-    // ]);
-    // console.log(stdout);
-
-    // fs.writeFile('../storage/'+req.query.nombre+'.mp4', imgBuffer);
 
     let ytDlpEventEmitter = ytDlpWrap
     .exec([
