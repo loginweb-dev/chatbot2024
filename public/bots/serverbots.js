@@ -64,7 +64,11 @@ app.post('/init', async (req, res) => {
             'bot': req.query.codigo,
             'file': 'qr/'+req.query.nombre+'.png'
         })
-        console.log('-----------------'+req.query.nombre+'----------------')
+        await axios.post(process.env.APP_API+'estado', {
+            'bot': req.query.codigo,
+            'estado': true
+        })
+        // console.log('-----------------'+req.query.nombre+'----------------')
     });
 
     wbot.on("authenticated", async session => {
