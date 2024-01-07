@@ -178,7 +178,8 @@
                             $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+migrupo+" | "+miauthor+"</span></div>")
                             break;
                         case "qr":            
-                            $("#misocket").prepend("<img style='width: 50%' src='"+milink+"' />") 
+                            $("#misocket").prepend("<img class='chat-multimedia' src='"+milink+"' />") 
+                            // location.reload()
                             break;
                         case "ready":            
                             location.reload()

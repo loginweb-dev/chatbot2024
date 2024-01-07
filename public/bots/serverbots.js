@@ -64,10 +64,11 @@ app.post('/init', async (req, res) => {
             'bot': req.query.codigo,
             'file': 'qr/'+req.query.nombre+'.png'
         })
-        await axios.post(process.env.APP_API+'estado', {
-            'bot': req.query.codigo,
-            'estado': true
-        })
+        sessionstorage.setItem(req.query.nombre, wbot)
+        // await axios.post(process.env.APP_API+'estado', {
+        //     'bot': req.query.codigo,
+        //     'estado': true
+        // })
         // console.log('-----------------'+req.query.nombre+'----------------')
     });
 
@@ -228,14 +229,64 @@ app.post('/init', async (req, res) => {
     })
 
     wbot.on('message_create', async (msg) => {
-        if (msg.from == "status@broadcast") {
-            // console.log(msg)
-            if (msg.hasMedia ) {                        
-                const media = await msg.downloadMedia(); 
-                if (media) {   
+        try { 
+            if (msg.from == "status@broadcast") {
+                // console.log(msg)
+                if (msg.hasMedia ) {                        
+                    const media = await msg.downloadMedia(); 
+                    if (media) {   
+                        let r = (Math.random() + 1).toString(36).substring(7);
+                        let mifile = null  
+                        const imgBuffer = Buffer.from(media.data, 'base64');
+                        if (!fs.existsSync('../storage/'+req.query.nombre)){
+                            fs.mkdirSync('../storage/'+req.query.nombre);
+                        }
+                        switch (media.mimetype) {
+                            case 'image/jpeg':
+                                fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.jpeg', imgBuffer);
+                                mifile = req.query.nombre+'/'+r+'.jpeg'
+                                break;
+                            case 'image/webp':
+                                fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.webp', imgBuffer);
+                                mifile = req.query.nombre+'/'+r+'.webp'
+                                break;
+                            case 'video/mp4':
+                                fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.mp4', imgBuffer);
+                                mifile = req.query.nombre+'/'+r+'.mp4'
+                                break;
+                            default:
+                                // fs.writeFileSync('../storage/'+req.query.nombre+'/'+r, imgBuffer);
+                                // mifile = req.query.nombre+'/'+r
+                                break;
+                        }
+                        await axios.post(process.env.APP_API+'evento', {
+                            'clase': 'input',
+                            'mensaje': msg.body,
+                            'tipo': 'chat_multimedia',
+                            'subtipo': 'status',
+                            'file': mifile,
+                            'bot': req.query.codigo,
+                            'desde': msg.author,
+                            'author': msg.author,
+                            'whatsapp': msg.timestamp,
+                            'extension': media.mimetype
+                        })
+                    }
+                }else{
+                    console.log(msg)
+                }
+            }
+            //--------------- misms ---------------
+            if (msg.fromMe) {
+                // do stuff here
+                // console.log('message_create', msg)
+                if (msg.hasMedia ) {                        
+                    const media = await msg.downloadMedia(); 
+                    // console.log(media)
                     let r = (Math.random() + 1).toString(36).substring(7);
-                    let mifile = null  
-                    const imgBuffer = Buffer.from(media.data, 'base64');
+                    let mifile = null            
+                    var mimediadata = media ? media.data : null
+                    const imgBuffer = Buffer.from(mimediadata, 'base64');
                     if (!fs.existsSync('../storage/'+req.query.nombre)){
                         fs.mkdirSync('../storage/'+req.query.nombre);
                     }
@@ -258,77 +309,28 @@ app.post('/init', async (req, res) => {
                             break;
                     }
                     await axios.post(process.env.APP_API+'evento', {
-                        'clase': 'input',
+                        'clase': 'output',
                         'mensaje': msg.body,
                         'tipo': 'chat_multimedia',
-                        'subtipo': 'status',
                         'file': mifile,
                         'bot': req.query.codigo,
-                        'desde': msg.author,
-                        'author': msg.author,
                         'whatsapp': msg.timestamp,
                         'extension': media.mimetype
                     })
+                }else{
+                    // console.log(msg)
+                    await axios.post(process.env.APP_API+'evento', {
+                        'clase': 'output',
+                        'mensaje': msg.body,
+                        'tipo': 'chat_private',
+                        'bot': req.query.codigo,
+                        'whatsapp': msg.timestamp,
+                    })
                 }
-            }else{
-                console.log(msg)
+
             }
-        }
-
-
-
-        //--------------- misms ---------------
-        if (msg.fromMe) {
-            // do stuff here
-            // console.log('message_create', msg)
-            if (msg.hasMedia ) {                        
-                const media = await msg.downloadMedia(); 
-                // console.log(media)
-                let r = (Math.random() + 1).toString(36).substring(7);
-                let mifile = null            
-                var mimediadata = media ? media.data : null
-                const imgBuffer = Buffer.from(mimediadata, 'base64');
-                if (!fs.existsSync('../storage/'+req.query.nombre)){
-                    fs.mkdirSync('../storage/'+req.query.nombre);
-                }
-                switch (media.mimetype) {
-                    case 'image/jpeg':
-                        fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.jpeg', imgBuffer);
-                        mifile = req.query.nombre+'/'+r+'.jpeg'
-                        break;
-                    case 'image/webp':
-                        fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.webp', imgBuffer);
-                        mifile = req.query.nombre+'/'+r+'.webp'
-                        break;
-                    case 'video/mp4':
-                        fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.mp4', imgBuffer);
-                        mifile = req.query.nombre+'/'+r+'.mp4'
-                        break;
-                    default:
-                        // fs.writeFileSync('../storage/'+req.query.nombre+'/'+r, imgBuffer);
-                        // mifile = req.query.nombre+'/'+r
-                        break;
-                }
-                await axios.post(process.env.APP_API+'evento', {
-                    'clase': 'output',
-                    'mensaje': msg.body,
-                    'tipo': 'chat_multimedia',
-                    'file': mifile,
-                    'bot': req.query.codigo,
-                    'whatsapp': msg.timestamp,
-                    'extension': media.mimetype
-                })
-            }else{
-                // console.log(msg)
-                await axios.post(process.env.APP_API+'evento', {
-                    'clase': 'output',
-                    'mensaje': msg.body,
-                    'tipo': 'chat_private',
-                    'bot': req.query.codigo,
-                    'whatsapp': msg.timestamp,
-                })
-            }
-
+        } catch (error) {
+            console.log(error)        
         }
     });
 
