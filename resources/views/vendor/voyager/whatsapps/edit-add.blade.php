@@ -217,12 +217,21 @@
         // console.log(inputs)
 
         let myInput = document.querySelector('input[name="user_id"]');
-        $("#mylogo").append("<a href='#' class='btn btn-xs btn-dark btn-block'> Galeria Multemedia </a>");
+        let myInput2 = document.querySelector('input[name="telefono"]');
+        let myInput3 = document.querySelector('input[name="codigo"]');
+        let myInput4 = document.querySelector('input[name="slug"]');
+        let myInput5 = document.querySelector('input[name="estado"]');
+        // $("#mylogo").append("<a href='#' class='btn btn-xs btn-dark btn-block'> Galeria Multemedia </a>");
         myInput.readOnly = true
+        myInput3.readOnly = true
+        myInput4.readOnly = true
+        myInput5.disabled = true
         @if($add)
-            myInput.value = "{{ $miuser->id }}"
-        @else
-                    
+            myInput.value = "{{ $miuser->id }}"        
+            myInput2.addEventListener('keyup', () => {
+                console.log(myInput2.value)
+                myInput3.value = '591'+myInput2.value+'@c.us'
+            })
         @endif
     </script>
 @stop

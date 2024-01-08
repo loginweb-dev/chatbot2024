@@ -105,9 +105,7 @@
                                 <tbody>
                                     @foreach($dataTypeContent as $data)
                         
-                                        <tr onclick="return  location.href='/admin/whatsapps/{{ $data->id }}'">
-                        
-                                                                            
+                                        <tr>                                                                                                
                                             @foreach($dataType->browseRows as $row)
                                                 @php
                                                 if ($data->{$row->field.'_browse'}) {
@@ -250,12 +248,12 @@
                                             @endforeach
                                 
                                             <td class="no-sort no-click bread-actions">
-                                                <!-- @foreach($actions as $action)
+                                                @foreach($actions as $action)
                                                     @if (!method_exists($action, 'massAction'))
                                                         @include('voyager::bread.partials.actions', ['action' => $action])
                                                     @endif
-                                                @endforeach-->
-                                                @php
+                                                @endforeach
+                                                <!-- @php
                                                     $mitext = $data->estado ? 'PAUSAR' : 'ACTIVAR';
                                                     $miclase = $data->estado ? 'btn-success' : 'btn-danger';
             
@@ -263,7 +261,7 @@
                                                 <a href="#" class="btn btn-sm pull-right {{ $miclase }}" onclick="miestado({{ $data->estado }}, '{{ $data->slug }}', '{{ $data->codigo }}', {{   $data->id }})"> 
                                                     <i class="voyager-edit"></i>
                                                     <span class="hidden-xs hidden-sm">{{ $mitext }}</span>
-                                                </a> 
+                                                </a>  -->
                                             </td>
                                         </tr>
                               

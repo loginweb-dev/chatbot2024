@@ -2,6 +2,9 @@
 
 @php
     $miwhats = App\Whatsapp::find($dataTypeContent->getKey());
+    $micontactos = App\Contacto::where("bot", $miwhats->codigo)->get();
+    $migrupos = App\Grupo::where("bot", $miwhats->codigo)->get();
+    $mieventos = App\Evento::where("bot", $miwhats->codigo)->get();
 @endphp
 
 @section('page_header')
@@ -16,48 +19,81 @@
 
 @section('content')
 
-    <main>
-        <section id="chat-window">
-            <header id="chat-window-header">
-                <img src="{{ asset('storage/'.$miwhats->logo) }}" alt="" class="avatar" id="profile-image">
-                <div id="active-chat-details">
-                    <h3> {{ $miwhats->nombre }}  <small>{{ $miwhats->codigo }}</small></h3>
-                    <!-- <div class="info">{{ $miwhats->codigo }}</div> -->
-                </div>
-                @if(!$miwhats->estado)
-                    <img src="{{ asset('icons/1F625.svg') }}" alt="" class="icon">
-                @else
-                    <img src="{{ asset('icons/emoji.svg') }}" alt="" class="icon">
-                @endif
-                <img src="{{ asset('icons/E256.svg') }}" alt="Contactos" class="icon" onclick="micontactos()">
-                <img src="{{ asset('icons/E25D.svg') }}" alt="" class="icon"  onclick="return location.href='/admin/whatsapps/{{ $miwhats->id }}/edit'">
-                <img src="{{ asset('icons/status.svg') }}" alt=" Solo Estados" class="icon" onclick="miestados()">
-                <img src="{{ asset('icons/new-chat.svg') }}" alt="Todos lo chats" class="icon" onclick="michats()">
-                <!-- <img src="{{ asset('icons/filter.svg') }}" alt="" class="icon"> -->
-                <div class="dropdown">
-                    <img src="{{ asset('icons/communities.svg') }}" alt="Filtro por Grupos" class="icon">
-                    <div class="dropdown-content contact-menu">
-                        <a href="#" onclick="migrupos()">Actualizar</a>
-                        <a href="#" onclick="migrupo()">Chats</a>
-                        <a href="#" onclick="migrupo2()">Multimedia</a>
+            <main>
+                <section id="chat-window">
+                    <header id="chat-window-header">
+                        <img src="{{ asset('storage/'.$miwhats->logo) }}" alt="" class="avatar" id="profile-image">
+                        <div id="active-chat-details">
+                            <h2> BOT: {{ $miwhats->nombre }} | {{ $miwhats->codigo }}</h2>
+                        </div> 
+                    </header>
+
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <div id="chat-window-contents">
+                                    <div id="misocket"></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+      
+
+                                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading" role="tab" id="headingOne">
+                                            <h4 class="panel-title">
+                                                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                Opciones del Bot
+                                                </a>
+                                            </h4>
+                                        </div>
+                                            <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                                            <div class="panel-body">
+                                                
+                                                @if(!$miwhats->estado)
+                                                    <a href="#" class="btn btn-danger btn-block" onclick="activar()" >ACTIVAR EL BOT</a>
+                                                    <br>
+                                                @else
+                                                    <a href="#" class="btn btn-dark btn-block" onclick="stop()" >INACTIVAR</a>
+                                                    <br>                   
+                                                @endif
+                                                <code>
+                                                    -> Nombre: {{ $miwhats->nombre }}
+                                                    <br>
+                                                    -> Codigo: {{ $miwhats->codigo }}
+                                                    <br>
+                                                    -> Telefono: {{ $miwhats->telefono }}
+                                                    <br>
+                                                    -> Creado: {{ $miwhats->created_at }}
+                                                    <br>
+                                                    -> Contactos: N° {{ count($micontactos) }}  
+                                                    <br>
+                                                    -> Grupos: N° {{ count($migrupos) }}
+                                                    <br>
+                                                    -> Eventos: N° {{ count($mieventos) }}
+                                                </code>
+
+                                                <h4 class="text-center">CONSULTAS</h4>
+                                                <a href="#" class="btn btn-dark btn-block" onclick="michats()" >Todos los Chats</a>
+                                                <a href="#" class="btn btn-dark btn-block" onclick="miestados()" >Estados de Contactos</a>
+                                                <a href="#" class="btn btn-dark btn-block" onclick="migrupo()" >Chats de Grupos</a>
+                                                <a href="#" class="btn btn-dark btn-block" onclick="migrupo2()" >Multimedia de Grupos</a>
+
+                                                <h4 class="text-center">Envios Masivos</h4>
+                                                <a href="#" class="btn btn-dark btn-block" onclick="micontactos()" >Enviar a Contactos</a>
+                                                <a href="#" class="btn btn-dark btn-block" onclick="migrupos()" >Enviar a Grupos</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                 
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- <div class="dropdown"> -->
-                    <!-- <img src="{{ asset('icons/menu.svg') }}" alt="" class="icon dropdown-button"> -->
-                    <!-- <div class="dropdown-content contact-menu"> -->
-                        <!-- <a href="#" onclick="init()">Re iniciar el BOT</a>
-                        <a href="#" onclick="midelete()">Pausar el BOT</a> -->
-                    <!-- </div> -->
-                <!-- </div> -->
-            </header>
-            <div id="chat-window-contents">
+                </section>            
+            </main>
 
-                <div id="misocket"></div>
 
-            </div>
-        </section>            
-    </main>
 
 
 
@@ -118,7 +154,7 @@
 
                     switch (miwhats.tipo) {
                         case "chat_multimedia":    
-                            $("#misocket").prepend("<div class='chat-message-group'><div class='chat-message'>"+miwhats.fwhats+"</div></div>")                                                   
+                            // $("#misocket").prepend("<div class='chat-message-group'><div class='chat-message'>"+miwhats.fwhats+"</div></div>")                                                   
                             if(miwhats.extension == "video/mp4") {
                                 $("#misocket").prepend("<video controls class='chat-multimedia'><source src='"+milink+"' type='"+miwhats.extension+"'></video>")
                             } else if(miwhats.extension == "audio/ogg; codecs=opus") {
@@ -135,16 +171,16 @@
                             switch (miwhats.subtipo) {
                                 case 'chat_private':
                                     var micontacto = miwhats.contacto ? miwhats.contacto.name : miwhats.desde
-                                    $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+micontacto+"</span></div>")
+                                    $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+micontacto+" | "+miwhats.fwhats+"</span></div>")
                                     break;
                                 case 'chat_group':
                                     var miauthor = miwhats.miauthor ? miwhats.miauthor.name : miwhats.author;
                                     var migrupo = miwhats.grupo ? miwhats.grupo.name : miwhats.desde
-                                    $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+migrupo+" | "+miauthor+"</span></div>")
+                                    $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+migrupo+" | "+miauthor+" | "+miwhats.fwhats+"</span></div>")
                                     break;
                                 case 'status':
                                     var micontacto = miwhats.contacto ? miwhats.contacto.name : miwhats.desde
-                                    $("#misocket").prepend("<div class='datestamp-container micontext'><span class='datestamp'>"+micontacto+"</span></div>")
+                                    $("#misocket").prepend("<div class='datestamp-container micontext'><span class='datestamp'>"+micontacto+" | "+miwhats.fwhats+"</span></div>")
                                     break;
                                 default:
                                     break;
@@ -154,12 +190,12 @@
                             switch (miwhats.subtipo) {
                                 case 'chat_private':
                                     var micliente = miwhats.micliente ? miwhats.micliente.name : miwhats.desde
-                                    $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+micliente+"</span></div>")                              
+                                    $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+micliente+" | "+miwhats.fwhats+"</span></div>")                              
                                     break;
                                 case 'chat_group':
                                     var miauthor = miwhats.miauthor ? miwhats.miauthor.name : miwhats.author;
                                     var migrupo = miwhats.grupo ? miwhats.grupo.name : miwhats.desde
-                                    $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+migrupo+" | "+miauthor+"</span></div>")
+                                    $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+migrupo+" | "+miauthor+" | "+miwhats.fwhats+"</span></div>")
                                     break;
                                 default:
                                     break;
@@ -170,12 +206,12 @@
                             break;
                         case "chat_private":            
                                 var micontacto = miwhats.contacto ? miwhats.contacto.name : miwhats.desde
-                                $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+micontacto+"</span></div>")
+                                $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+micontacto+" | "+miwhats.fwhats+"</span></div>")
                             break;
                         case "chat_group":
                             var miauthor = miwhats.miauthor ? miwhats.miauthor.name : miwhats.author;
                             var migrupo = miwhats.grupo ? miwhats.grupo.name : miwhats.desde
-                            $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+migrupo+" | "+miauthor+"</span></div>")
+                            $("#misocket").prepend("<div class='datestamp-container'><span class='datestamp'>"+migrupo+" | "+miauthor+" | "+miwhats.fwhats+"</span></div>")
                             break;
                         case "qr":            
                             $("#misocket").prepend("<img class='chat-multimedia' src='"+milink+"' />") 
@@ -195,15 +231,18 @@
                             break;
                     }                                  
                }
-            })
+            }
+        )
         
+        
+        async function activar(){
+            await axios.post("{{ env('APP_BOT') }}/init?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}") 
+        }
 
-        
-        
-        
-        
-        
-        
+        async function stop(){
+            await axios.post("{{ env('APP_BOT') }}/stop?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}") 
+        }
+
         async function micontactos(){
             await axios.post("{{ env('APP_BOT') }}/contactos?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}")
         }
@@ -251,16 +290,16 @@
                         switch (miwhats[index].subtipo) {                            
                             case 'chat_private':
                                 var micontacto = miwhats[index].contacto ? miwhats[index].contacto.name : miwhats[index].desde
-                                $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+micontacto+"</span></div>")
+                                $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+micontacto+" | "+miwhats[index].fwhats+"</span></div>")
                                 break;
                             case 'chat_group':
                                     var miauthor = miwhats[index].miauthor ? miwhats[index].miauthor.name : miwhats[index].author;
                                     var migrupo = miwhats[index].grupo ? miwhats[index].grupo.name : miwhats[index].desde
-                                    $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+migrupo+" | "+miauthor+"</span></div>")
+                                    $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+migrupo+" | "+miauthor+" | "+miwhats[index].fwhats+"</span></div>")
                                 break;
                             case 'status':
                                 var micontacto = miwhats[index].contacto ? miwhats[index].contacto.name : miwhats[index].desde
-                                $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+micontacto+"</span></div>")
+                                $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+micontacto+" | "+miwhats[index].fwhats+"</span></div>")
                                 break;
                             default:
                                 break;
@@ -278,18 +317,18 @@
                         } else {
                             $("#misocket").append("<img class='chat-multimedia' src='"+milink+"' />")   
                         }   
-                        $("#misocket").append("<div class='chat-message-group'><div class='chat-message'>"+miwhats[index].fwhats+"</div></div>")     
+                        // $("#misocket").append("<div class='chat-message-group'><div class='chat-message'>"+miwhats[index].fwhats+"</div></div>")     
                         break;
                     case "chat_location":
                         switch (miwhats[index].subtipo) {
                             case 'chat_private':
                                 var micontacto = miwhats[index].contacto ? miwhats[index].contacto.name : miwhats[index].desde                                    
-                                $("#misocket").append("<div class='datestamp-container'><span class='datestamp'>"+micontacto+"</span></div>")                   
+                                $("#misocket").append("<div class='datestamp-container'><span class='datestamp'>"+micontacto+" | "+miwhats[index].fwhats+"</span></div>")                   
                                 break;
                             case 'chat_group':
                                 var miauthor = miwhats[index].miauthor ? miwhats[index].miauthor.name : miwhats[index].author;
                                     var migrupo = miwhats[index].grupo ? miwhats[index].grupo.name : miwhats[index].desde
-                                $("#misocket").append("<div class='datestamp-container'><span class='datestamp'>"+migrupo+" | "+miauthor+"</span></div>")
+                                $("#misocket").append("<div class='datestamp-container'><span class='datestamp'>"+migrupo+" | "+miauthor+" | "+miwhats[index].fwhats+"</span></div>")
                                 break;
                             default:
                                 break;
@@ -300,12 +339,12 @@
                         break;
                     case "chat_private":             
                         var micontacto = miwhats[index].contacto ? miwhats[index].contacto.name : miwhats[index].desde                                    
-                        $("#misocket").append("<div class='datestamp-container'><span class='datestamp'>"+micontacto+"</span></div>")
+                        $("#misocket").append("<div class='datestamp-container'><span class='datestamp'>"+micontacto+" | "+miwhats[index].fwhats+"</span></div>")
                         break;
                     case "chat_group":
                         var miauthor = miwhats[index].miauthor ? miwhats[index].miauthor.name : miwhats[index].author;
                         var migrupo = miwhats[index].grupo ? miwhats[index].grupo.name : miwhats[index].desde
-                        $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+migrupo+" | "+miauthor+"</span></div>")
+                        $("#misocket").append("<div class='datestamp-container micontext'><span class='datestamp'>"+migrupo+" | "+miauthor+" | "+miwhats[index].fwhats+"</span></div>")
                         break;
                     default:
                         break;

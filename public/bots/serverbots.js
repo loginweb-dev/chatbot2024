@@ -51,18 +51,19 @@ app.post('/init', async (req, res) => {
         if (!fs.existsSync('../storage/qr')){
             fs.mkdirSync('../storage/qr');
         }
+        let r = (Math.random() + 1).toString(36).substring(3);
         var qr_svg = qr.image(qrwb, { type: 'png' });
-        qr_svg.pipe(require('fs').createWriteStream('../storage/qr/'+req.query.nombre+'.png'));
-        qrcode.generate(qrwb, {small: true}, function (qrcode) {
-            console.log(qrcode)
-            console.log('Nuevo QR del chatbot '+req.query.nombre+', recuerde que se genera cada 1/2 minuto')        
-        })
+        qr_svg.pipe(require('fs').createWriteStream('../storage/qr/'+r+'.png'));
+        // qrcode.generate(qrwb, {small: true}, function (qrcode) {
+        //     console.log(qrcode)
+        //     console.log('Nuevo QR del chatbot '+req.query.nombre+', recuerde que se genera cada 1/2 minuto')        
+        // })
 
         await axios.post(process.env.APP_API+'evento', {
             'mensaje': 'Escanea el nuevo QR',
             'tipo': 'qr',
             'bot': req.query.codigo,
-            'file': 'qr/'+req.query.nombre+'.png'
+            'file': 'qr/'+r+'.png'
         })
         sessionstorage.setItem(req.query.nombre, wbot)
         // await axios.post(process.env.APP_API+'estado', {
@@ -128,7 +129,7 @@ app.post('/init', async (req, res) => {
                     if (media) {           
                         // console.log('-----------------MEDIA-----------------')
                             
-                        let r = (Math.random() + 1).toString(36).substring(7);
+                        let r = (Math.random() + 1).toString(36).substring(3);
                         let mifile = null   
                         
                         const imgBuffer = Buffer.from(media.data, 'base64');
@@ -235,7 +236,7 @@ app.post('/init', async (req, res) => {
                 if (msg.hasMedia ) {                        
                     const media = await msg.downloadMedia(); 
                     if (media) {   
-                        let r = (Math.random() + 1).toString(36).substring(7);
+                        let r = (Math.random() + 1).toString(36).substring(3);
                         let mifile = null  
                         const imgBuffer = Buffer.from(media.data, 'base64');
                         if (!fs.existsSync('../storage/'+req.query.nombre)){
@@ -283,7 +284,7 @@ app.post('/init', async (req, res) => {
                 if (msg.hasMedia ) {                        
                     const media = await msg.downloadMedia(); 
                     // console.log(media)
-                    let r = (Math.random() + 1).toString(36).substring(7);
+                    let r = (Math.random() + 1).toString(36).substring(3);
                     let mifile = null            
                     var mimediadata = media ? media.data : null
                     const imgBuffer = Buffer.from(mimediadata, 'base64');
@@ -334,6 +335,13 @@ app.post('/init', async (req, res) => {
         }
     });
 
+    await axios.post(process.env.APP_API+'evento', {
+        'clase': 'input',
+        'tipo': 'init',
+        'bot': req.query.codigo,
+        'mensaje': 'Iniciando el BOT: '+req.query.nombre+", espere que los chats se carguen..",
+    })
+
     wbot.initialize();
     res.send(true)
 });
@@ -353,7 +361,6 @@ app.post('/stop', async (req, res) => {
             'clase': 'input',
             'tipo': 'destroy',
             'bot': req.query.codigo,
-            'whatsapp': msg.timestamp,
             'mensaje': 'El bot  *'+req.query.nombre+'* fue pausado'
         })
         console.log('El bot  *'+req.query.nombre+'* fue pausado')
@@ -400,7 +407,7 @@ app.post('/contactos', async (req, res) => {
                 const url = await contacts[index].getProfilePicUrl();
                 if (url) {
                     const response = await axios.get(url, { responseType: 'arraybuffer' })
-                    let r = (Math.random() + 1).toString(36).substring(7)
+                    let r = (Math.random() + 1).toString(36).substring(3)
                     var mifile = '../storage/'+req.query.nombre+'/'+r+'.jpeg'
                     if (!fs.existsSync('../storage/'+req.query.nombre)){
                         fs.mkdirSync('../storage/'+req.query.nombre);
@@ -476,7 +483,7 @@ app.post('/download', async (req, res) => {
         '-f',
         'best[ext=mp4]',
         '-o',
-        '../storage/download/'+req.query.nombre+'.mp4',
+        '../storage/download/'+req.query.name+'.mp4',
     ])
     .on('progress', (progress) =>
         console.log(

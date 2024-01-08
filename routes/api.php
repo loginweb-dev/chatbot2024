@@ -10,6 +10,7 @@ use App\Evento;
 use App\Whatsapp;
 use App\Contacto;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -30,6 +31,7 @@ Route::post('/socket/contactos', function (Request $request) {
 	try {		
 		$mifind = Contacto::where('number', $request->number)->where('bot', $request->bot)->first();
 		if ($mifind) {
+			Storage::disk('public')->delete($mifind->avatar);
 			$mifind->name = $request->midata["name"];
 			$mifind->shortName = $request->midata["shortName"];
 			$mifind->isBusiness = $request->midata["isBusiness"];
@@ -37,7 +39,7 @@ Route::post('/socket/contactos', function (Request $request) {
 			$mifind->bot = $request->bot;
 			$mifind->_id = $request->_id;
 			$mifind->avatar = $request->avatar;
-			$mifind->save();
+			$mifind->save();			
 		}else{
 			$micpontato = Contacto::create($request->midata);
 			$micpontato->bot = $request->bot;
@@ -48,7 +50,6 @@ Route::post('/socket/contactos', function (Request $request) {
 		}
 		event(new MiEvent([
 			'mensaje'=> "Se agrego o actualizo el contacto ".$request->midata["name"]. ", con el codigo  ".$request->number,
-			// 'codigo' => $request->bot,
 			'bot' => $request->bot,
 			'tipo' => $request->tipo,
 			'file' => $request->avatar ? $request->avatar : null,
@@ -92,7 +93,8 @@ Route::post('/socket/grupos', function (Request $request) {
 		event(new MiEvent([
 			'mensaje'=> "Se agrego o actualizo el grupo ".$request->name.", con el codigo  ".$request->codigo,
 			'bot' => $request->bot,
-			'fwhats' => date('Y-m-d H:i:s')
+			'fwhats' => date('Y-m-d H:i:s'),
+			'tipo' => $request->tipo
 		]));
 		return true;
 	} catch (Exception $e) {
