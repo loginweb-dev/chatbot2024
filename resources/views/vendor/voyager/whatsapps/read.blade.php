@@ -5,6 +5,8 @@
     $micontactos = App\Contacto::where("bot", $miwhats->codigo)->get();
     $migrupos = App\Grupo::where("bot", $miwhats->codigo)->get();
     $mieventos = App\Evento::where("bot", $miwhats->codigo)->get();
+    $sendcontacto = App\Contacto::where("bot", $miwhats->codigo)->where("send", false)->get();
+    $sendgrupo = App\Grupo::where("bot", $miwhats->codigo)->where("send", false)->get();
 @endphp
 
 @section('page_header')
@@ -24,7 +26,7 @@
                     <header id="chat-window-header">
                         <img src="{{ asset('storage/'.$miwhats->logo) }}" alt="" class="avatar" id="profile-image">
                         <div id="active-chat-details">
-                            <h2> BOT: {{ $miwhats->nombre }} | {{ $miwhats->codigo }}</h2>
+                            <h2> BOT: {{ $miwhats->nombre }} | {{ $miwhats->telefono }}</h2>
                         </div> 
                     </header>
 
@@ -50,13 +52,7 @@
                                             <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
                                             <div class="panel-body">
                                                 
-                                                @if(!$miwhats->estado)
-                                                    <a href="#" class="btn btn-danger btn-block" onclick="activar()" >ACTIVAR EL BOT</a>
-                                                    <br>
-                                                @else
-                                                    <a href="#" class="btn btn-dark btn-block" onclick="stop()" >INACTIVAR</a>
-                                                    <br>                   
-                                                @endif
+                                                <h4 class="text-center">INFORMACION</h4>
                                                 <code>
                                                     -> Nombre: {{ $miwhats->nombre }}
                                                     <br>
@@ -66,22 +62,38 @@
                                                     <br>
                                                     -> Creado: {{ $miwhats->created_at }}
                                                     <br>
-                                                    -> Contactos: N° {{ count($micontactos) }}  
-                                                    <br>
-                                                    -> Grupos: N° {{ count($migrupos) }}
-                                                    <br>
-                                                    -> Eventos: N° {{ count($mieventos) }}
+                                                    -> Total Chats: N° {{ count($mieventos) }}
                                                 </code>
+                                                @if(!$miwhats->estado)
+                                                    <a href="#" class="btn btn-danger btn-block" onclick="activar()" >ACTIVAR EL BOT</a>
+                                                    <br>
+                                                @else
+                                                    <a href="#" class="btn btn-dark btn-block" onclick="stop()" >INACTIVAR</a>                  
+                                                @endif
 
+                                                <hr>
                                                 <h4 class="text-center">CONSULTAS</h4>
+
                                                 <a href="#" class="btn btn-dark btn-block" onclick="michats()" >Todos los Chats</a>
                                                 <a href="#" class="btn btn-dark btn-block" onclick="miestados()" >Estados de Contactos</a>
                                                 <a href="#" class="btn btn-dark btn-block" onclick="migrupo()" >Chats de Grupos</a>
                                                 <a href="#" class="btn btn-dark btn-block" onclick="migrupo2()" >Multimedia de Grupos</a>
 
+                                                <hr>
+                                                <h4 class="text-center">Actualizar Registros</h4>
+                                                <code>
+                                                    -> Total Grupos: N° {{ count($migrupos) }}
+                                                    <br>
+                                                    -> Total Contactos: N° {{ count($micontactos) }}
+                                                </code>                                        
+                                                <a href="#" class="btn btn-dark btn-block" onclick="micontactos()" >Contactos</a>
+                                                <a href="#" class="btn btn-dark btn-block" onclick="migrupos()" >Grupos</a>
+                                                
+                                                <hr>
                                                 <h4 class="text-center">Envios Masivos</h4>
-                                                <a href="#" class="btn btn-dark btn-block" onclick="micontactos()" >Enviar a Contactos</a>
-                                                <a href="#" class="btn btn-dark btn-block" onclick="migrupos()" >Enviar a Grupos</a>
+                                                <a href="#" class="btn btn-dark btn-block" onclick="misend('contacto')" >sms a contactos</a>
+                                                <a href="#" class="btn btn-dark btn-block" onclick="misend('grupo')" >sms a grupos</a>
+
                                             </div>
                                         </div>
                                     </div>
@@ -235,12 +247,51 @@
         )
         
         
+        function sleep(ms) {
+            return new Promise(
+                resolve => setTimeout(resolve, ms)
+            );
+        }
+
+        async function misend(type){
+            
+            switch (type) {
+                case "contacto":
+                    @foreach($sendcontacto as $item)                        
+                        var segundos = Math.floor(Math.random() * 60) + 60;
+                        console.log("{{ $item->codigo }}")
+                        console.log("{{ $miwhats->codigo }}")
+                        console.log(segundos)
+                        await axios.post("{{ env('APP_BOT') }}/send?phone={{ $item->codigo }}&slug={{ $miwhats->slug }}&bot={{ $miwhats->codigo }}&type="+type) 
+                        console.log("{{ $item->codigo }}")
+                        await sleep(segundos * 1000)
+                    @endforeach
+                    break;
+                case "grupo":
+                    console.log("{{ $sendgrupo }}")
+                    @foreach($sendgrupo as $item)                        
+                        var segundos = Math.floor(Math.random() * 60) + 60;
+                        console.log("{{ $item->codigo }}")
+                        console.log("{{ $miwhats->codigo }}")
+                        console.log(segundos)
+                        await axios.post("{{ env('APP_BOT') }}/send?phone={{ $item->codigo }}&slug={{ $miwhats->slug }}&bot={{ $miwhats->codigo }}&type="+type) 
+                        console.log("{{ $item->codigo }}")
+                        await sleep(segundos * 1000)
+                    @endforeach
+                    break;
+                default:
+                    break;
+            }
+
+
+        }
+
         async function activar(){
             await axios.post("{{ env('APP_BOT') }}/init?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}") 
         }
 
         async function stop(){
-            await axios.post("{{ env('APP_BOT') }}/stop?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}") 
+            var mirest = await axios.post("{{ env('APP_BOT') }}/stop?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}") 
         }
 
         async function micontactos(){

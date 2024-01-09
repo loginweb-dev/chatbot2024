@@ -36,17 +36,17 @@ Route::post('/socket/contactos', function (Request $request) {
 			$mifind->shortName = $request->midata["shortName"];
 			$mifind->isBusiness = $request->midata["isBusiness"];
 			$mifind->isBlocked = $request->midata["isBlocked"];
+			$mifind->avatar = $request->avatar;
+			// $mifind->send = false;
+			$mifind->save();			
+		}else{
+			$mifind = Contacto::create($request->midata);
 			$mifind->bot = $request->bot;
 			$mifind->_id = $request->_id;
 			$mifind->avatar = $request->avatar;
-			$mifind->save();			
-		}else{
-			$micpontato = Contacto::create($request->midata);
-			$micpontato->bot = $request->bot;
-			$micpontato->_id = $request->_id;
-			$micpontato->avatar = $request->avatar;
-			$micpontato->codigo = $request->midata["id"]["_serialized"];
-			$micpontato->save();
+			$mifind->send = false;
+			$mifind->codigo = $request->midata["id"]["_serialized"];
+			$mifind->save();
 		}
 		event(new MiEvent([
 			'mensaje'=> "Se agrego o actualizo el contacto ".$request->midata["name"]. ", con el codigo  ".$request->number,
@@ -55,13 +55,21 @@ Route::post('/socket/contactos', function (Request $request) {
 			'file' => $request->avatar ? $request->avatar : null,
 			'fwhats' => date('Y-m-d H:i:s')
 		]));
-		return true;
+		return $mifind;
     } catch (Exception $e) {
 		event(new MiEvent([
 			'error' => 'contacto'
 		]));
     	return $e;
 	}
+});
+
+Route::post('/socket/contacto/update', function (Request $request) {
+	$midata = Contacto::where('codigo', $request->codigo)->where('bot', $request->bot)->first();
+	$midata->send = true;
+	$midata->save();
+	// sleep($request->segundos);
+	return true;
 });
 
 Route::post('/socket/grupos', function (Request $request) {
@@ -76,7 +84,7 @@ Route::post('/socket/grupos', function (Request $request) {
 			$mifind->owner = json_encode($request->owner);
 			$mifind->save();
 		}else{
-			$migrupo = Grupo::create([
+			$mifind = Grupo::create([
 				'_id' => json_encode($request->_id),
 				'name' => $request->name,
 				'bot' => $request->bot,
@@ -87,7 +95,8 @@ Route::post('/socket/grupos', function (Request $request) {
 				'lastMessage' => json_encode($request->lastMessage),
 				'owner' => json_encode($request->owner),
 				'creation' => $request->creation,
-				'desc' => $request->desc
+				'desc' => $request->desc,
+				'send' => false
 			]);
 		}
 		event(new MiEvent([
@@ -96,7 +105,7 @@ Route::post('/socket/grupos', function (Request $request) {
 			'fwhats' => date('Y-m-d H:i:s'),
 			'tipo' => $request->tipo
 		]));
-		return true;
+		return $mifind;
 	} catch (Exception $e) {
 		event(new MiEvent([
 			'error' => 'grupo'
@@ -104,6 +113,14 @@ Route::post('/socket/grupos', function (Request $request) {
     	return $e;
 	}
 
+});
+
+Route::post('/socket/grupo/update', function (Request $request) {
+	$midata = Grupo::where('codigo', $request->codigo)->where('bot', $request->bot)->first();
+	$midata->send = true;
+	$midata->save();
+	// sleep($request->segundos);
+	return true;
 });
 
 Route::post('/socket/evento', function (Request $request) {	

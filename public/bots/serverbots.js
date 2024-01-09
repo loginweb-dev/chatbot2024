@@ -12,6 +12,8 @@ var sessionstorage = require('sessionstorage');
 const YTDlpWrap = require('yt-dlp-wrap').default;
 const ytDlpWrap = new YTDlpWrap('/usr/local/bin/yt-dlp');
 
+const cliProgress = require('cli-progress');
+const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
 
 const app = express();
 app.use(express.json())
@@ -39,11 +41,11 @@ app.post('/init', async (req, res) => {
         puppeteer: {
             executablePath: '/usr/bin/google-chrome-stable'
         },
-        puppeteer: {
-            headless: true,
-            ignoreDefaultArgs: ['--disable-extensions'],
-            args: ['--no-sandbox']
-        }
+        // puppeteer: {
+        //     headless: true,
+        //     ignoreDefaultArgs: ['--disable-extensions'],
+        //     args: ['--no-sandbox']
+        // }
     });
     
     wbot.on('qr', async (qrwb) => {
@@ -388,14 +390,12 @@ app.post('/getContactById', async (req, res) => {
 app.post('/contactos', async (req, res) => {
     console.log(req.query)
     
-    try {    
+    try {            
         var miwbot = sessionstorage.getItem(req.query.nombre)
         const contacts = await miwbot.getContacts();
-
-        for (let index = 0; index < contacts.length; index++) {
-            // console.log(msg)
-            if (contacts[index].isMyContact) {                          
-                var mirest = await axios.post(process.env.APP_API+'contactos', {
+        for (let index = 0; index < contacts.length; index++) {                                 
+            if (contacts[index].isMyContact) {                                         
+                var micontc = await axios.post(process.env.APP_API+'contactos', {
                     'midata': contacts[index],
                     'bot': req.query.codigo,
                     '_id': contacts[index].id,
@@ -403,7 +403,7 @@ app.post('/contactos', async (req, res) => {
                     'avatar': null,
                     'tipo': 'contactos'
                 })   
-                // console.log(mirest.data)
+
                 const url = await contacts[index].getProfilePicUrl();
                 if (url) {
                     const response = await axios.get(url, { responseType: 'arraybuffer' })
@@ -416,7 +416,7 @@ app.post('/contactos', async (req, res) => {
                         if (err) throw err;
                         console.log('Image downloaded successfully!');
                     });
-                    var mirest = await axios.post(process.env.APP_API+'contactos', {
+                    await axios.post(process.env.APP_API+'contactos', {
                         'midata': contacts[index],
                         'bot': req.query.codigo,
                         '_id': contacts[index].id,
@@ -425,8 +425,7 @@ app.post('/contactos', async (req, res) => {
                         'tipo': 'contactos',
                         'codigo': contacts[index].id._serialized
                     })   
-                    // console.log(mirest.data)
-                }
+                }          
             }
         }
     } catch (error) {
@@ -440,13 +439,11 @@ app.post('/historial', async (req, res) => {
     console.log(req.query)    
     try {    
         var miwbot = sessionstorage.getItem(req.query.nombre)
-        const historial = await miwbot.getChats();
-        
-        for (let index = 0; index < historial.length; index++) {
-            console.log(historial[index])
+        const historial = await miwbot.getChats();        
+        for (let index = 0; index < historial.length; index++) {             
             if (historial[index].isGroup) {
                 console.log(historial[index])
-                await axios.post(process.env.APP_API+'grupos', {
+                var midata = await axios.post(process.env.APP_API+'grupos', {
                     // 'midata': historial[index],
                     'name': historial[index].name,
                     'bot': req.query.codigo,
@@ -461,9 +458,6 @@ app.post('/historial', async (req, res) => {
                     'desc': historial[index].groupMetadata.desc,
                     'creation': historial[index].groupMetadata.creation
                 })   
-
-                // const url = await historial[index].getProfilePicUrl();
-                // console.log(url)
             }
         }
         console.log(historial.length)
@@ -472,11 +466,54 @@ app.post('/historial', async (req, res) => {
     }
     res.send(true)
 });
+
+
+
+app.post('/send', async (req, res)=>{
+    console.log(req.query)
+
+    var miwbot = sessionstorage.getItem(req.query.slug)
+    var phone = req.query.phone
+    var message = '*Vive la nueva forma de ver la TV*\n'
+    message+= '*con iptvbolivia.com*\n\n'
+    message+= '-> + de 140 Canales en vivo, Altamente estables\n'
+    message+= '-> + de 1400 Películas y series, HD y FHD\n'
+    message+= '-> Eventos Deportivos y Sociales\n'
+    message+= '-> Futbol Nacional e Internacional\n'
+    message+= '-> Soporte Técnico 24/7\n\n'
+    message+= 'más info en: https://chat.whatsapp.com/BmCw3kp5NEYFdTCO7jbRGe'
+    const media = MessageMedia.fromFilePath("../storage/"+req.query.slug+"/0avideo001.mp4")
+    miwbot.sendMessage(phone, media, {caption: message})
+                
+    console.log('mensaje enviado..') 
+    switch (req.query.type) {
+        case "contacto":
+            await axios.post(process.env.APP_API+'contacto/update', {
+                'codigo': req.query.phone,
+                'bot': req.query.bot
+            }) 
+            break;
+        case "grupo":
+            await axios.post(process.env.APP_API+'grupo/update', {
+                'codigo': req.query.phone,
+                'bot': req.query.bot
+            }) 
+            break;
+        default:
+            break;
+    }
+   
+                                                
+    res.send(true)        
+})
 //------------YT-DLP-----------------
 //----------------------------------
 app.post('/download', async (req, res) => {
     console.log(req.query)
 
+    if (!fs.existsSync('../storage/'+req.query.nombre)){
+        fs.mkdirSync('../storage/'+req.query.nombre);
+    }
     let ytDlpEventEmitter = ytDlpWrap
     .exec([
         req.query.url,
