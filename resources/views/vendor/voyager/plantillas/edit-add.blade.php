@@ -5,6 +5,7 @@
     $miwhats = App\Whatsapp::where("user_id", $miuser->id)->where("default" , true)->first();
     $contactos = App\Contacto::where("bot", $miwhats->codigo)->get();
     $grupos = App\Grupo::where("bot", $miwhats->codigo)->get();
+    $mitamplate = App\Plantilla::find($dataTypeContent->getKey());
 @endphp
 
 @extends('voyager::master')
@@ -217,11 +218,10 @@
 
 
         let myInput = document.querySelector('input[name="user_id"]');
-        let myInput2 = document.querySelector('input[name="url"]');
-        let myInput3 = document.querySelector('textarea[name="message"]');
-        let myInput4 = document.querySelector('input[name="slug"]');
+        let mimensaje = document.querySelector('textarea[name="mensaje"]');
+        // let mimultimedia = document.querySelector('input[name="multimedia[]"]');
 
-        
+        // console.log(mimultimedia)
 
         let migrupos = document.querySelector('select[name="grupos[]"]');
         console.log(migrupos)
@@ -238,28 +238,35 @@
         @foreach($contactos as $item)
             var option = document.createElement("option");
             option.value = "{{ $item->codigo }}";
-            option.text = "{{ $item->name }}";
+            option.text = "{{ $item->name }} | {{ $item->number }}";
             micontactos.appendChild(option);
         @endforeach
 
         myInput.readOnly = true
-        myInput4.readOnly = true
+        // myInput4.readOnly = true
+
+       
         @if($add)
-            myInput.value = "{{ $miuser->id }}"        
+            var mimultimedia =  null
+            myInput.value = "{{ $miuser->id }}"    
+        @else
+            mimultimedia =  "{{ $mitamplate->multimedia ? (json_decode($mitamplate->multimedia))[0]->download_link :  null }}"
         @endif
 
+        console.log(mimultimedia)
         $( "#miform" ).on( "submit", async function( event ) {
             // event.preventDefault()
 
-            await axios.post("{{ env('APP_BOT') }}/download", {
-                name: "{{ $miuser->name }}",
-                url: myInput2.value,
-                slug: myInput4.value,
+            var midata = {
                 grupos: Array.from(migrupos.selectedOptions).map(({ value }) => value),
                 contactos: Array.from(micontactos.selectedOptions).map(({ value }) => value),
                 bot: "{{ $miwhats->slug }}",
-                message: myInput3.value
-            })
+                message: mimensaje.value,
+                multimedia: mimultimedia
+            }
+
+            console.log(midata)
+            await axios.post("{{ env('APP_BOT') }}/template", midata)
         });
     </script>
 @stop

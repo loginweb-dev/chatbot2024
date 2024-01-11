@@ -21,112 +21,114 @@
 
 @section('content')
 
-            <main>
-                <section id="chat-window">
-                    <header id="chat-window-header">
-                        <img src="{{ asset('storage/'.$miwhats->logo) }}" alt="" class="avatar" id="profile-image">
-                        <div id="active-chat-details">
-                            <h2> BOT: {{ $miwhats->nombre }} | {{ $miwhats->telefono }}</h2>
-                        </div> 
-                    </header>
+    <main>
+        <section id="chat-window">
+            <header id="chat-window-header">
+                <img src="{{ asset('storage/'.$miwhats->logo) }}" alt="" class="avatar" id="profile-image">
+                <div id="active-chat-details">
+                    <h2> BOT: {{ $miwhats->nombre }} | {{ $miwhats->telefono }}</h2>
+                </div> 
+            </header>
 
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-sm-8">
-                                <div id="chat-window-contents">
-                                    <div id="misocket"></div>
-                                </div>
-                            </div>
-                            <div class="col-sm-4">
-      
-
-                                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-                                    <div class="panel panel-default">
-                                        <div class="panel-heading" role="tab" id="headingOne">
-                                            <h4 class="panel-title">
-                                                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                                Opciones del Bot
-                                                </a>
-                                            </h4>
-                                        </div>
-                                            <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-                                            <div class="panel-body">
-                                                
-                                                <h4 class="text-center">INFORMACION</h4>
-                                                <code>
-                                                    -> Nombre: {{ $miwhats->nombre }}
-                                                    <br>
-                                                    -> Codigo: {{ $miwhats->codigo }}
-                                                    <br>
-                                                    -> Telefono: {{ $miwhats->telefono }}
-                                                    <br>
-                                                    -> Creado: {{ $miwhats->created_at }}
-                                                    <br>
-                                                    -> Total Chats: N° {{ count($mieventos) }}
-                                                </code>
-                                                @if(!$miwhats->estado)
-                                                    <a href="#" class="btn btn-danger btn-block" onclick="activar()" >ACTIVAR EL BOT</a>
-                                                    <br>
-                                                @else
-                                                    <a href="#" class="btn btn-dark btn-block" onclick="stop()" >INACTIVAR</a>                  
-                                                @endif
-
-                                                <hr>
-                                                <h4 class="text-center">CONSULTAS</h4>
-
-                                                <a href="#" class="btn btn-dark btn-block" onclick="michats()" >Todos los Chats</a>
-                                                <a href="#" class="btn btn-dark btn-block" onclick="miestados()" >Estados de Contactos</a>
-                                                <a href="#" class="btn btn-dark btn-block" onclick="migrupo()" >Chats de Grupos</a>
-                                                <a href="#" class="btn btn-dark btn-block" onclick="migrupo2()" >Multimedia de Grupos</a>
-
-                                                <hr>
-                                                <h4 class="text-center">Actualizar Registros</h4>
-                                                <code>
-                                                    -> Total Grupos: N° {{ count($migrupos) }}
-                                                    <br>
-                                                    -> Total Contactos: N° {{ count($micontactos) }}
-                                                </code>                                        
-                                                <a href="#" class="btn btn-dark btn-block" onclick="micontactos()" >Contactos</a>
-                                                <a href="#" class="btn btn-dark btn-block" onclick="migrupos()" >Grupos</a>
-                                                
-                                                <hr>
-                                                <h4 class="text-center">Envios Masivos</h4>
-                                                <a href="#" class="btn btn-dark btn-block" onclick="misend('contacto')" >sms a contactos</a>
-                                                <a href="#" class="btn btn-dark btn-block" onclick="misend('grupo')" >sms a grupos</a>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                 
-                                </div>
-                            </div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div id="chat-window-contents">
+                            <div id="misocket"></div>
                         </div>
                     </div>
-                </section>            
-            </main>
+                    <div class="col-sm-4">
 
 
+                        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                            <div class="panel panel-default">
+                                <div class="panel-heading" role="tab" id="headingOne">
+                                    <h4 class="panel-title">
+                                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                        Opciones del Bot
+                                        </a>
+                                    </h4>
+                                </div>
+                                    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                                    <div class="panel-body">
+                                        
+                                        <h4 class="text-center">INFORMACION</h4>
+                                        <code>
+                                            -> Nombre: {{ $miwhats->nombre }}
+                                            <br>
+                                            -> Codigo: {{ $miwhats->codigo }}
+                                            <br>
+                                            -> Telefono: {{ $miwhats->telefono }}
+                                            <br>
+                                            -> Creado: {{ $miwhats->created_at }}
+                                            <br>
+                                            -> Total Chats: N° {{ count($mieventos) }}
+                                            <br>
+                                            -> Numero:  {{ $miwhats->number }}
+                                            <br>
+                                            -> Slug:  {{ $miwhats->slug }}
+                                            <br>
+                                            -> Default:  {{ $miwhats->default ? 'ACTIVO' : 'INACTIVO' }}
+                                        </code>
+                                        @if(!$miwhats->estado)
+                                            <a href="#" class="btn btn-danger btn-block" onclick="activar()" >ACTIVAR EL BOT</a>
+                                            <br>
+                                        @else
+                                            <a href="#" class="btn btn-dark btn-block" onclick="stop()" >INACTIVAR</a>                  
+                                        @endif
 
+                                        <hr>
+                                        <h4 class="text-center">CONSULTAS</h4>
 
+                                        <a href="#" class="btn btn-dark btn-block" onclick="michats()" >Todos los Chats</a>
+                                        <a href="#" class="btn btn-dark btn-block" onclick="miestados()" >Estados de Contactos</a>
+                                        <a href="#" class="btn btn-dark btn-block" onclick="migrupo()" >Chats de Grupos</a>
+                                        <a href="#" class="btn btn-dark btn-block" onclick="migrupo2()" >Multimedia de Grupos</a>
 
-<!-- Modal -->
-<div class="modal fade modal-primary" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-      </div>
-      <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" onclick="migrupos()">Save changes</button>
-      </div>
+                                        <hr>
+                                        <h4 class="text-center">Actualizar Registros</h4>
+                                        <code>
+                                            -> Total Grupos: N° {{ count($migrupos) }}
+                                            <br>
+                                            -> Total Contactos: N° {{ count($micontactos) }}
+                                        </code>                                        
+                                        <a href="#" class="btn btn-dark btn-block" onclick="micontactos()" >Contactos</a>
+                                        <a href="#" class="btn btn-dark btn-block" onclick="migrupos()" >Grupos</a>
+                                        
+                                        <!-- <hr>
+                                        <h4 class="text-center">Envios Masivos</h4>
+                                        <a href="#" class="btn btn-dark btn-block" onclick="misend('contacto')" >sms a contactos</a>
+                                        <a href="#" class="btn btn-dark btn-block" onclick="misend('grupo')" >sms a grupos</a> -->
+
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>            
+    </main>
+
+    <!-- Modal -->
+    <div class="modal fade modal-primary" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+        </div>
+        <div class="modal-body">
+            ...
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="migrupos()">Save changes</button>
+        </div>
+        </div>
     </div>
-  </div>
-</div>
+    </div>
 
 @stop
 
