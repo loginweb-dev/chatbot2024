@@ -318,7 +318,8 @@ app.post('/init', async (req, res) => {
                         'file': mifile,
                         'bot': req.query.codigo,
                         'whatsapp': msg.timestamp,
-                        'extension': media.mimetype
+                        'extension': media.mimetype,
+                        'desde': req.query.codigo,
                     })
                 }else{
                     // console.log(msg)
@@ -328,6 +329,7 @@ app.post('/init', async (req, res) => {
                         'tipo': 'chat_private',
                         'bot': req.query.codigo,
                         'whatsapp': msg.timestamp,
+                        'desde': req.query.codigo,
                     })
                 }
 
@@ -509,33 +511,90 @@ app.post('/send', async (req, res)=>{
 //------------YT-DLP-----------------
 //----------------------------------
 app.post('/download', async (req, res) => {
-    console.log(req.query)
+    // console.log(req.query)
+    console.log(req.body)
 
-    if (!fs.existsSync('../storage/'+req.query.nombre)){
-        fs.mkdirSync('../storage/'+req.query.nombre);
+
+
+    if (!fs.existsSync('../storage/'+req.body.name)){
+        fs.mkdirSync('../storage/'+req.body.name);
     }
-    let ytDlpEventEmitter = ytDlpWrap
-    .exec([
-        req.query.url,
+
+    // let ytDlpEventEmitter = ytDlpWrap
+    // .exec([
+    //     req.body.url,
+    //     '-f',
+    //     'best[ext=mp4]',
+    //     '-o',
+    //     '../storage/'+req.body.name+'/'+req.body.slug+'.mp4',
+    // ])
+    // .on('progress', (progress) =>
+    //     console.log(
+    //         progress.percent,
+    //         progress.totalSize,
+    //         progress.currentSpeed,
+    //         progress.eta
+    //     )
+    // )
+    // .on('ytDlpEvent', (eventType, eventData) =>
+    //     console.log(eventType, eventData)
+    // )
+    // .on('error', (error) => console.error(error))
+    // .on('close', async () => 
+    //     await axios.post(process.env.APP_API+'download/update', {
+    //         'slug': req.body.slug,
+    //         'file': req.body.name+'/'+req.body.slug+'.mp4'
+    //     }),
+    //     console.log('all done')
+    // );
+
+    // console.log(ytDlpEventEmitter.ytDlpProcess.pid);
+
+    // var miwbot = sessionstorage.getItem(req.body.bot)
+    // // misend(req.body.message, req.body.name+'/'+req.body.slug+'.mp4', miwbot, req.body.grupos)
+    // for (let index = 0; index < req.body.grupos.length; index++) {
+    //     const media = MessageMedia.fromFilePath(req.body.name+'/'+req.body.slug+'.mp4')
+    //     miwbot.sendMessage(req.body.grupos[index], media, {caption: req.body.message})
+    //     console.log("mensaje enviado ...") 
+    // }
+
+
+    let stdout = await ytDlpWrap.execPromise([
+        req.body.url,
         '-f',
         'best[ext=mp4]',
         '-o',
-        '../storage/download/'+req.query.name+'.mp4',
-    ])
-    .on('progress', (progress) =>
-        console.log(
-            progress.percent,
-            progress.totalSize,
-            progress.currentSpeed,
-            progress.eta
-        )
-    )
-    .on('ytDlpEvent', (eventType, eventData) =>
-        console.log(eventType, eventData)
-    )
-    .on('error', (error) => console.error(error))
-    .on('close', () => console.log('all done'));
+        '../storage/'+req.body.name+'/'+req.body.slug+'.mp4',
+    ]);
+    console.log(stdout);
+    await axios.post(process.env.APP_API+'download/update', {
+        'slug': req.body.slug,
+        'file': req.body.name+'/'+req.body.slug+'.mp4'
+    })
 
-    console.log(ytDlpEventEmitter.ytDlpProcess.pid);
+    var miwbot = sessionstorage.getItem(req.body.bot)
+    if (miwbot) {    
+        // grupos
+        for (let index = 0; index < req.body.grupos.length; index++) {
+            const media = MessageMedia.fromFilePath('../storage/'+req.body.name+'/'+req.body.slug+'.mp4')
+            miwbot.sendMessage(req.body.grupos[index], media, {caption: req.body.message})
+            console.log("mensaje enviado ...") 
+        }
+
+        //contactos
+        for (let index = 0; index < req.body.contactos.length; index++) {
+            const media = MessageMedia.fromFilePath('../storage/'+req.body.name+'/'+req.body.slug+'.mp4')
+            miwbot.sendMessage(req.body.contactos[index], media, {caption: req.body.message})
+            console.log("mensaje enviado ...") 
+        }
+    }
     res.send(true)
 });
+
+function misend(message, multimedia, miwbot, migrupos) {
+    for (let index = 0; index < migrupos.length; index++) {
+        const media = MessageMedia.fromFilePath("../storage/"+multimedia)
+        miwbot.sendMessage(migrupos[index], media, {caption: message})
+        console.log("mensaje enviado ...") 
+    }
+}

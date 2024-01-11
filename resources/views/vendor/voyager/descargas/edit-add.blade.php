@@ -2,6 +2,9 @@
     $edit = !is_null($dataTypeContent->getKey());
     $add  = is_null($dataTypeContent->getKey());
     $miuser = Auth::user(); 
+    $miwhats = App\Whatsapp::where("user_id", $miuser->id)->where("default" , true)->first();
+    $contactos = App\Contacto::where("bot", $miwhats->codigo)->get();
+    $grupos = App\Grupo::where("bot", $miwhats->codigo)->get();
 @endphp
 
 @extends('voyager::master')
@@ -83,7 +86,7 @@
                                     @else
                                         {!! app('voyager')->formField($row, $dataType, $dataTypeContent) !!}
                                     @endif
-
+                                   
                                     @foreach (app('voyager')->afterFormFields($row, $dataType, $dataTypeContent) as $after)
                                         {!! $after->handle($row, $dataType, $dataTypeContent) !!}
                                     @endforeach
@@ -139,6 +142,7 @@
 @stop
 
 @section('javascript')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
     <script>
         var params = {};
         var $file;
@@ -211,36 +215,51 @@
             $('[data-toggle="tooltip"]').tooltip();
         });
 
-        // var inputs = $('#myuser :input');
-        // var inputs = document.getElementById('myuser').getElementsByTagName('input');
-        // inputs.setAttribute('value', 90)
-        // console.log(inputs)
 
         let myInput = document.querySelector('input[name="user_id"]');
-        // let myInput2 = document.querySelector('input[name="url"]');
-        // let myInput2 = document.querySelector('input[name="telefono"]');
-        // let myInput3 = document.querySelector('input[name="codigo"]');
-        // let myInput4 = document.querySelector('input[name="slug"]');
-        // let myInput5 = document.querySelector('input[name="estado"]');
-        // $("#mylogo").append("<a href='#' class='btn btn-xs btn-dark btn-block'> Galeria Multemedia </a>");
+        let myInput2 = document.querySelector('input[name="url"]');
+        let myInput3 = document.querySelector('input[name="message"]');
+        let myInput4 = document.querySelector('input[name="slug"]');
+
+        
+
+        let migrupos = document.querySelector('select[name="grupos[]"]');
+        console.log(migrupos)
+        @foreach($grupos as $item)
+            var option = document.createElement("option");
+            option.value = "{{ $item->codigo }}";
+            option.text = "{{ $item->name }}";
+            migrupos.appendChild(option);
+        @endforeach
+
+
+        let micontactos = document.querySelector('select[name="contactos[]"]');
+        console.log(micontactos)
+        @foreach($contactos as $item)
+            var option = document.createElement("option");
+            option.value = "{{ $item->codigo }}";
+            option.text = "{{ $item->name }}";
+            micontactos.appendChild(option);
+        @endforeach
+
         myInput.readOnly = true
-        // myInput3.readOnly = true
-        // myInput4.readOnly = true
-        // myInput5.disabled = true
+        myInput4.readOnly = true
         @if($add)
             myInput.value = "{{ $miuser->id }}"        
-            // myInput2.addEventListener('keyup', () => {
-            //     console.log(myInput2.value)
-            //     myInput3.value = '591'+myInput2.value+'@c.us'
-            // })
         @endif
 
-        $( "#miform" ).on( "submit", function( event ) {
-            // alert( "Handler for `submit` called." );
-            // event.preventDefault();
-            console.log(myInput2.value)
-            await axios.post("{{ env('APP_BOT') }}/download?nombre={{ $miuser->name }}&url="+myInput2.value)
+        $( "#miform" ).on( "submit", async function( event ) {
+            // event.preventDefault()
 
+            await axios.post("{{ env('APP_BOT') }}/download", {
+                name: "{{ $miuser->name }}",
+                url: myInput2.value,
+                slug: myInput4.value,
+                grupos: Array.from(migrupos.selectedOptions).map(({ value }) => value),
+                contactos: Array.from(micontactos.selectedOptions).map(({ value }) => value),
+                bot: "{{ $miwhats->slug }}",
+                message: myInput3
+            })
         });
     </script>
 @stop

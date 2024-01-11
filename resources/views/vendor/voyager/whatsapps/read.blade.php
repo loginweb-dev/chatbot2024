@@ -155,12 +155,12 @@
                     console.log(e.message)
                     if (miwhats.mensaje) {
                         var messages = miwhats.mensaje
-                        for(var i=0; i< messages.length; i++) {
-                            messages = messages.replace(/\~(.*)\~/, "<del>$1</del>")
-                                .replace(/\_(.*)\_/, "<em>$1</em>")
-                                .replace(/\*(.*)\*/, "<strong>$1</strong>")
-                        }
-                        messages = messages.replace(/(\b(https?|):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, "<a href='$1' target='_blank'>$1</a>");
+                        // for(var i=0; i< messages.length; i++) {
+                        //     messages = messages.replace(/\~(.*)\~/, "<del>$1</del>")
+                        //         .replace(/\_(.*)\_/, "<em>$1</em>")
+                        //         .replace(/\*(.*)\*/, "<strong>$1</strong>")
+                        // }
+                        // messages = messages.replace(/(\b(https?|):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, "<a href='$1' target='_blank'>$1</a>");
                         $("#misocket").prepend("<div class='chat-message-group'><div class='chat-message'>"+messages+"<span class='chat-message-time'>"+miwhats.fwhats+"</span></div></div>") 
                     }
 
@@ -268,7 +268,7 @@
                     @endforeach
                     break;
                 case "grupo":
-                    console.log("{{ $sendgrupo }}")
+                    // console.log("{{ $sendgrupo }}")
                     @foreach($sendgrupo as $item)                        
                         var segundos = Math.floor(Math.random() * 60) + 60;
                         console.log("{{ $item->codigo }}")
@@ -403,12 +403,12 @@
 
                 if (miwhats[index].mensaje) {
                     var messages = miwhats[index].mensaje
-                    for(var i=0; i< messages.length; i++) {
-                        messages = messages.replace(/\~(.*)\~/, "<del>$1</del>")
-                            .replace(/\_(.*)\_/, "<em>$1</em>")
-                            .replace(/\*(.*)\*/, "<strong>$1</strong>")
-                    }
-                    messages = messages.replace(/(\b(https?|):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, "<a href='$1' target='_blank'>$1</a>");
+                    // for(var i=0; i< messages.length; i++) {
+                    //     messages = messages.replace(/\~(.*)\~/, "<del>$1</del>")
+                    //         .replace(/\_(.*)\_/, "<em>$1</em>")
+                    //         .replace(/\*(.*)\*/, "<strong>$1</strong>")
+                    // }
+                    // messages = messages.replace(/(\b(https?|):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, "<a href='$1' target='_blank'>$1</a>");
                     $("#misocket").append("<div class='chat-message-group text-center'><div class='chat-message'>"+messages+"<span class='chat-message-time'>"+miwhats[index].fwhats+"</span></div></div>") 
 
                 }

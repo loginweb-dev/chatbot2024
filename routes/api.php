@@ -9,6 +9,7 @@ use App\Grupo;
 use App\Evento;
 use App\Whatsapp;
 use App\Contacto;
+use App\Descarga;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 /*
@@ -306,4 +307,17 @@ Route::post('/ai/mistral', function (Request $request) {
 	} else {
 		return json_decode($response);
 	}
+});
+
+
+/// download ---------------------
+
+Route::post('/socket/download/update', function (Request $request) {
+	$midata = Descarga::where('slug', $request->slug)->first();
+	$midata->file = $request->file;
+	$midata->save();
+	event(new MiEvent([
+		'tipo' => 'download'
+	]));
+	return true;
 });
