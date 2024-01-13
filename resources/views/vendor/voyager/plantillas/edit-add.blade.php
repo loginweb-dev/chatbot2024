@@ -224,17 +224,17 @@
         // console.log(mimultimedia)
 
         let migrupos = document.querySelector('select[name="grupos[]"]');
-        console.log(migrupos)
+        // console.log(migrupos)
         @foreach($grupos as $item)
             var option = document.createElement("option");
             option.value = "{{ $item->codigo }}";
-            option.text = "{{ $item->name }}";
+            option.text = "{{ $item->name }} | {{ $item->type }}";
             migrupos.appendChild(option);
         @endforeach
 
 
         let micontactos = document.querySelector('select[name="contactos[]"]');
-        console.log(micontactos)
+        // console.log(micontactos)
         @foreach($contactos as $item)
             var option = document.createElement("option");
             option.value = "{{ $item->codigo }}";
@@ -267,6 +267,37 @@
 
             console.log(midata)
             await axios.post("{{ env('APP_BOT') }}/template", midata)
+        });
+
+
+        var midata = ["negocios", "noticias", "propio", "miscelaneos", "adultos", "enlaces", "deportes", "privado", "memes"]
+        var miselect = document.createElement("select")
+        miselect.setAttribute('class', "form-control")
+
+        var option = document.createElement("option")
+            option.value = null
+            option.text = "Seleciona un tipo grupo"
+            miselect.appendChild(option)   
+        for (let index = 0; index < midata.length; index++) {
+            option = document.createElement("option")
+            option.value = midata[index]
+            option.text = midata[index]
+            miselect.appendChild(option)            
+        }
+        $("#mygroup").append(miselect);
+        miselect.addEventListener("change", function(e) {
+            var micount=0
+            const allOptions = Array.from(migrupos.options).map(option => option.text);
+            allOptions.find((value, index) => {
+                if (value.indexOf(this.value) > -1) {
+                    migrupos.options[index].selected = true
+                    // console.log(migrupos.options[index])
+                    micount = micount + 1
+                    $("#mygroup").append(micount+" - "+migrupos.options[index].text+"<br>")
+                }
+            });
+            migrupos.disabled = true
+            miselect.disabled = true
         });
     </script>
 @stop

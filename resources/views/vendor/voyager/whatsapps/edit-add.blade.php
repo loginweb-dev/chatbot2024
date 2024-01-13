@@ -1,7 +1,7 @@
 @php
     $edit = !is_null($dataTypeContent->getKey());
     $add  = is_null($dataTypeContent->getKey());
-    $miuser = Auth::user(); 
+    $miuser = Auth::user()->id; 
 @endphp
 
 @extends('voyager::master')
@@ -220,16 +220,16 @@
         let myInput2 = document.querySelector('input[name="telefono"]');
         let myInput3 = document.querySelector('input[name="codigo"]');
         let myInput4 = document.querySelector('input[name="slug"]');
-        let myInput5 = document.querySelector('input[name="estado"]');
+        // let myInput5 = document.querySelector('input[name="estado"]');
         // $("#mylogo").append("<a href='#' class='btn btn-xs btn-dark btn-block'> Galeria Multemedia </a>");
         myInput.readOnly = true
         myInput3.readOnly = true
         myInput4.readOnly = true
-        myInput5.disabled = true
+        // myInput5.disabled = true
         @if($add)
-            myInput.value = "{{ $miuser->id }}"        
+            myInput.value = "{{ $miuser }}"        
             myInput2.addEventListener('keyup', () => {
-                console.log(myInput2.value)
+                // console.log(myInput2.value)
                 myInput3.value = '591'+myInput2.value+'@c.us'
             })
         @endif

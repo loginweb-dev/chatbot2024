@@ -25,15 +25,12 @@ class VoyagerWhatsappController extends \TCG\Voyager\Http\Controllers\VoyagerBas
 
     public function index(Request $request)
     {
-        // return $this->getSlug($request);
         // GET THE SLUG, ex. 'posts', 'pages', etc.
         $slug = $this->getSlug($request);
 
         // GET THE DataType based on the slug
         // $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
         $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
-
-        // return $dataType;
 
         // Check permission
         $this->authorize('browse', app($dataType->model_name));
@@ -58,11 +55,12 @@ class VoyagerWhatsappController extends \TCG\Voyager\Http\Controllers\VoyagerBas
         if (strlen($dataType->model_name) != 0) {
             $model = app($dataType->model_name);
             
+            // mi code---------------------------------------------
             $query = $model::select($dataType->name.'.*');
             if (Auth::user()->role_id != 1) {
                $query->where($dataType->name.'.user_id', Auth::user()->id);
             }
-
+            // mi code---------------------------------------------
 
             if ($dataType->scope && $dataType->scope != '' && method_exists($model, 'scope'.ucfirst($dataType->scope))) {
                 $query->{$dataType->scope}();
@@ -182,7 +180,6 @@ class VoyagerWhatsappController extends \TCG\Voyager\Http\Controllers\VoyagerBas
             $view = "voyager::$slug.browse";
         }
 
-        // return $dataTypeContent[1];
         return Voyager::view($view, compact(
             'actions',
             'dataType',

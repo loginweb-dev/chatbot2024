@@ -6,7 +6,7 @@ use TCG\Voyager\Facades\Voyager;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class VoyagerGrupoController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
+class VoyagerContactoController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
 {
     public function index(Request $request)
     {

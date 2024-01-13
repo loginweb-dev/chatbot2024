@@ -12,6 +12,7 @@ use App\Contacto;
 use App\Descarga;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -38,7 +39,8 @@ Route::post('/socket/contactos', function (Request $request) {
 			$mifind->isBusiness = $request->midata["isBusiness"];
 			$mifind->isBlocked = $request->midata["isBlocked"];
 			$mifind->avatar = $request->avatar;
-			// $mifind->send = false;
+			$mifind->send = false;
+			$mifind->user_id = $request->user_id;
 			$mifind->save();			
 		}else{
 			$mifind = Contacto::create($request->midata);
@@ -46,6 +48,7 @@ Route::post('/socket/contactos', function (Request $request) {
 			$mifind->_id = $request->_id;
 			$mifind->avatar = $request->avatar;
 			$mifind->send = false;
+			$mifind->user_id = $request->user_id;
 			$mifind->codigo = $request->midata["id"]["_serialized"];
 			$mifind->save();
 		}
@@ -66,9 +69,9 @@ Route::post('/socket/contactos', function (Request $request) {
 });
 
 Route::post('/socket/contacto/update', function (Request $request) {
-	$midata = Contacto::where('codigo', $request->codigo)->where('bot', $request->bot)->first();
-	$midata->send = true;
-	$midata->save();
+	// $midata = Contacto::where('codigo', $request->codigo)->where('bot', $request->bot)->first();
+	// $midata->send = true;
+	// $midata->save();
 	// sleep($request->segundos);
 	return true;
 });
@@ -83,6 +86,8 @@ Route::post('/socket/grupos', function (Request $request) {
 			$mifind->groupMetadata = json_encode($request->groupMetadata);
 			$mifind->lastMessage = json_encode($request->lastMessage);
 			$mifind->owner = json_encode($request->owner);
+			$mifind->send = false;
+			$mifind->user_id = $request->user_id;
 			$mifind->save();
 		}else{
 			$mifind = Grupo::create([
@@ -97,7 +102,8 @@ Route::post('/socket/grupos', function (Request $request) {
 				'owner' => json_encode($request->owner),
 				'creation' => $request->creation,
 				'desc' => $request->desc,
-				'send' => false
+				'send' => false,
+				'user_id' => $request->user_id
 			]);
 		}
 		event(new MiEvent([
@@ -117,11 +123,11 @@ Route::post('/socket/grupos', function (Request $request) {
 });
 
 Route::post('/socket/grupo/update', function (Request $request) {
-	$midata = Grupo::where('codigo', $request->codigo)->where('bot', $request->bot)->first();
-	$midata->send = true;
-	$midata->save();
-	// sleep($request->segundos);
-	return true;
+	// $midata = Grupo::where('codigo', $request->codigo)->where('slug', $request->bot)->first();
+	// $midata->send = true;
+	// $midata->save();
+	// // sleep($request->segundos);
+	// return true;
 });
 
 Route::post('/socket/evento', function (Request $request) {	
@@ -226,7 +232,7 @@ Route::post('/grupo/find', function (Request $request) {
 
 Route::post('/whatsapp/listar', function (Request $request) {
 	return Evento::where('bot', $request->bot)
-	->where('created_at', '>=', date('Y-m-d'))
+	// ->where('created_at', '>=', date('Y-m-d'))
 	->orderBy('created_at', 'desc')
 	->with('contacto', 'grupo', 'miauthor')
 	->take(15)

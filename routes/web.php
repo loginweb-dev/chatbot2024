@@ -23,12 +23,21 @@ Route::group(['prefix' => 'admin'], function () {
 
         App\Evento::truncate();
         App\Contacto::truncate();
-        App\Grupo::truncate();
+        App\Grupo::truncate();       
         $miwhats = App\Whatsapp::all();
         foreach ($miwhats as $value) {
             Storage::disk('public')->deleteDirectory($value->slug);
         }        
         Storage::disk('public')->deleteDirectory('qr');
-        return redirect('/admin/whatsapps');
+
+        App\Whatsapp::truncate();
+        App\Descarga::truncate();
+        App\Plantilla::truncate();
+        $miuser = App\Models\User::all();
+        foreach ($miuser as $value) {
+            Storage::disk('public')->deleteDirectory($value->name);
+        }   
+
+        return redirect('/admin');
     });
 });

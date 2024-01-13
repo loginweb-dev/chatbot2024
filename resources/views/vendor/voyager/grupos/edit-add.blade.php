@@ -1,10 +1,6 @@
 @php
     $edit = !is_null($dataTypeContent->getKey());
     $add  = is_null($dataTypeContent->getKey());
-    $miuser = Auth::user(); 
-    $miwhats = App\Whatsapp::where("user_id", $miuser->id)->where("default" , true)->first();
-    $contactos = App\Contacto::where("bot", $miwhats->codigo)->get();
-    $grupos = App\Grupo::where("bot", $miwhats->codigo)->get();
 @endphp
 
 @extends('voyager::master')
@@ -33,7 +29,7 @@
                     <form role="form"
                             class="form-edit-add"
                             action="{{ $edit ? route('voyager.'.$dataType->slug.'.update', $dataTypeContent->getKey()) : route('voyager.'.$dataType->slug.'.store') }}"
-                            method="POST" enctype="multipart/form-data" id="miform">
+                            method="POST" enctype="multipart/form-data">
                         <!-- PUT Method if we are editing -->
                         @if($edit)
                             {{ method_field("PUT") }}
@@ -86,7 +82,7 @@
                                     @else
                                         {!! app('voyager')->formField($row, $dataType, $dataTypeContent) !!}
                                     @endif
-                                   
+
                                     @foreach (app('voyager')->afterFormFields($row, $dataType, $dataTypeContent) as $after)
                                         {!! $after->handle($row, $dataType, $dataTypeContent) !!}
                                     @endforeach
@@ -142,7 +138,6 @@
 @stop
 
 @section('javascript')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
     <script>
         var params = {};
         var $file;
@@ -215,87 +210,13 @@
             $('[data-toggle="tooltip"]').tooltip();
         });
 
-
-        let myInput = document.querySelector('input[name="user_id"]');
-        let myInput2 = document.querySelector('input[name="url"]');
-        let myInput3 = document.querySelector('textarea[name="message"]');
-        let myInput4 = document.querySelector('input[name="slug"]');
-
-        // let mibot = document.querySelector('input[name="bot"]');
-        // mibot.readOnly = true
-        let migrupos = document.querySelector('select[name="grupos[]"]');
-        // console.log(migrupos)
-        @foreach($grupos as $item)
-            var option = document.createElement("option");
-            option.value = "{{ $item->codigo }}";
-            option.text = "{{ $item->name }} | {{ $item->type }}";
-            migrupos.appendChild(option);
-        @endforeach
-        // migrupos.options[0].selected = true
-
-        let micontactos = document.querySelector('select[name="contactos[]"]');
-        // console.log(micontactos)
-        @foreach($contactos as $item)
-            var option = document.createElement("option");
-            option.value = "{{ $item->codigo }}";
-            option.text = "{{ $item->name }}";
-            micontactos.appendChild(option);
-        @endforeach
-
+        let myInput = document.querySelector('input[name="name"]')
+        let myInput2 = document.querySelector('textarea[name="desc"]')
+        let myInput3 = document.querySelector('input[name="bot"]')
+        let myInput4 = document.querySelector('input[name="creation"]')
         myInput.readOnly = true
-        myInput4.readOnly = true
-        @if($add)
-            myInput.value = "{{ $miuser->id }}"        
-        @endif
-
-        $( "#miform" ).on( "submit", async function( event ) {
-            // event.preventDefault()
-
-            await axios.post("{{ env('APP_BOT') }}/download", {
-                name: "{{ $miuser->name }}",
-                url: myInput2.value,
-                slug: myInput4.value,
-                grupos: Array.from(migrupos.selectedOptions).map(({ value }) => value),
-                contactos: Array.from(micontactos.selectedOptions).map(({ value }) => value),
-                bot: "{{ $miwhats->slug }}",
-                message: myInput3.value
-            })
-        });
-
-        // var migrupo = $('#mygroup');
-        // var inputs = document.getElementById('myuser').getElementsByTagName('input');
-        // inputs.setAttribute('value', 90)
-
-        var midata = ["negocios", "noticias", "propio", "miscelaneos", "adultos", "enlaces", "deportes", "privado", "memes"]
-        var miselect = document.createElement("select")
-        miselect.setAttribute('class', "form-control")
-
-        var option = document.createElement("option")
-            option.value = null
-            option.text = "Seleciona un tipo grupo"
-            miselect.appendChild(option)   
-        for (let index = 0; index < midata.length; index++) {
-            option = document.createElement("option")
-            option.value = midata[index]
-            option.text = midata[index]
-            miselect.appendChild(option)            
-        }
-        $("#mygroup").append(miselect);
-        miselect.addEventListener("change", function(e) {
-           var micount=0
-            const allOptions = Array.from(migrupos.options).map(option => option.text);
-            allOptions.find((value, index) => {
-                if (value.indexOf(this.value) > -1) {
-                    migrupos.options[index].selected = true
-                    // console.log(migrupos.options[index])
-                    micount = micount + 1
-                    $("#mygroup").append(micount+" - "+migrupos.options[index].text+"<br>")
-                }
-            });
-            
-            migrupos.disabled = true
-            miselect.disabled = true
-        });
-        // var mibot = document.getElementById('myuser').getElementsByTagName('input');
+        myInput2.readOnly  = true
+        myInput3.readOnly  = true
+        myInput4.readOnly  = true
     </script>
 @stop

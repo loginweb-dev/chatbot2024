@@ -12,9 +12,6 @@ var sessionstorage = require('sessionstorage');
 const YTDlpWrap = require('yt-dlp-wrap').default;
 const ytDlpWrap = new YTDlpWrap('/usr/local/bin/yt-dlp');
 
-const cliProgress = require('cli-progress');
-const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
-
 const app = express();
 app.use(express.json())
 app.use(cors())
@@ -26,6 +23,9 @@ app.listen(process.env.API_PORT, async () => {
     console.log('iniciando el serverbot...')
     console.log('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.API_PORT);
 });
+
+//------------API-----------------
+//----------------------------------
 
 app.get('/', async (req, res) => {
     res.send('CHATBOT ESTA LISTO EN EL PUERTO: '+process.env.API_PORT)
@@ -41,11 +41,11 @@ app.post('/init', async (req, res) => {
         puppeteer: {
             executablePath: '/usr/bin/google-chrome-stable'
         },
-        // puppeteer: {
-        //     headless: true,
-        //     ignoreDefaultArgs: ['--disable-extensions'],
-        //     args: ['--no-sandbox']
-        // }
+        puppeteer: {
+            headless: true,
+            ignoreDefaultArgs: ['--disable-extensions'],
+            args: ['--no-sandbox']
+        }
     });
     
     wbot.on('qr', async (qrwb) => {
@@ -338,7 +338,6 @@ app.post('/init', async (req, res) => {
 });
 
 
-
 app.post('/stop', async (req, res) => {
     try {        
         var miwbot = sessionstorage.getItem(req.query.nombre)
@@ -375,7 +374,6 @@ app.post('/getContactById', async (req, res) => {
     res.send(true)
 });
 
-
 app.post('/contactos', async (req, res) => {
     console.log(req.query)
     
@@ -384,13 +382,14 @@ app.post('/contactos', async (req, res) => {
         const contacts = await miwbot.getContacts();
         for (let index = 0; index < contacts.length; index++) {                                 
             if (contacts[index].isMyContact) {                                         
-                var micontc = await axios.post(process.env.APP_API+'contactos', {
+                await axios.post(process.env.APP_API+'contactos', {
                     'midata': contacts[index],
                     'bot': req.query.codigo,
                     '_id': contacts[index].id,
                     'number': contacts[index].number,
                     'avatar': null,
-                    'tipo': 'contactos'
+                    'tipo': 'contactos',
+                    'user_id': req.query.user_id
                 })   
 
                 const url = await contacts[index].getProfilePicUrl();
@@ -412,7 +411,8 @@ app.post('/contactos', async (req, res) => {
                         'number': contacts[index].number,
                         'avatar': req.query.nombre+'/'+r+'.jpeg',
                         'tipo': 'contactos',
-                        'codigo': contacts[index].id._serialized
+                        'codigo': contacts[index].id._serialized,
+                        'user_id': req.query.user_id
                     })   
                 }          
             }
@@ -431,7 +431,7 @@ app.post('/historial', async (req, res) => {
         const historial = await miwbot.getChats();        
         for (let index = 0; index < historial.length; index++) {             
             if (historial[index].isGroup) {
-                console.log(historial[index])
+                // console.log(historial[index])
                 var midata = await axios.post(process.env.APP_API+'grupos', {
                     // 'midata': historial[index],
                     'name': historial[index].name,
@@ -445,18 +445,17 @@ app.post('/historial', async (req, res) => {
                     'tipo': 'grupos',
                     'owner': historial[index].groupMetadata.owner,
                     'desc': historial[index].groupMetadata.desc,
-                    'creation': historial[index].groupMetadata.creation
+                    'creation': historial[index].groupMetadata.creation,
+                    'user_id': req.query.user_id
                 })   
             }
         }
-        console.log(historial.length)
+        // console.log(midata.data)
     } catch (error) {
         console.log(error)
     }
     res.send(true)
 });
-
-
 
 app.post('/send', async (req, res)=>{
     console.log(req.query)
@@ -526,7 +525,6 @@ app.post('/template', async (req, res)=>{
 //------------YT-DLP-----------------
 //----------------------------------
 app.post('/download', async (req, res) => {
-    // console.log(req.query)
     console.log(req.body)
 
     try {        
@@ -540,9 +538,9 @@ app.post('/download', async (req, res) => {
             'best[ext=mp4]',
             '-o',
             '../storage/'+req.body.name+'/'+req.body.slug+'.mp4',
-        ]);
-        
-        // console.log(stdout);
+        ]);        
+        console.log(stdout);
+
         await axios.post(process.env.APP_API+'download/update', {
             'slug': req.body.slug,
             'file': req.body.name+'/'+req.body.slug+'.mp4'
@@ -552,16 +550,27 @@ app.post('/download', async (req, res) => {
         if (miwbot) {    
             // grupos
             for (let index = 0; index < req.body.grupos.length; index++) {
+                var stats = fs.statSync('../storage/'+req.body.name+'/'+req.body.slug+'.mp4');
                 const media = MessageMedia.fromFilePath('../storage/'+req.body.name+'/'+req.body.slug+'.mp4')
                 miwbot.sendMessage(req.body.grupos[index], media, {caption: req.body.message})
-                console.log("mensaje enviado ...") 
+                await axios.post(process.env.APP_API+'grupo/update', {
+                    'codigo': req.body.grupos[index],
+                    'bot': req.body.bot
+                }) 
+                console.log("mensaje enviado.. SIZE: "+stats.size) 
             }
 
             //contactos
             for (let index = 0; index < req.body.contactos.length; index++) {
+                var stats = fs.statSync('../storage/'+req.body.name+'/'+req.body.slug+'.mp4');
                 const media = MessageMedia.fromFilePath('../storage/'+req.body.name+'/'+req.body.slug+'.mp4')
                 miwbot.sendMessage(req.body.contactos[index], media, {caption: req.body.message})
-                console.log("mensaje enviado ...") 
+                // miwbot.sendMessage(req.body.contactos[index], "mierda..")
+                await axios.post(process.env.APP_API+'contacto/update', {
+                    'codigo': req.body.grupos[index],
+                    'bot': req.body.bot
+                }) 
+                console.log("mensaje enviado.. SIZE: "+stats.size)  
             }
         }
     } catch (error) {

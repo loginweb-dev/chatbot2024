@@ -42,33 +42,31 @@
 
                         <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
                             <div class="panel panel-default">
-                                <div class="panel-heading" role="tab" id="headingOne">
+                                <!-- <div class="panel-heading" role="tab" id="headingOne">
                                     <h4 class="panel-title">
                                         <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                                         Opciones del Bot
                                         </a>
                                     </h4>
-                                </div>
+                                </div> -->
                                     <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
                                     <div class="panel-body">
                                         
                                         <h4 class="text-center">INFORMACION</h4>
                                         <code>
-                                            -> Nombre: {{ $miwhats->nombre }}
+                                            Nombre: {{ $miwhats->nombre }}
                                             <br>
-                                            -> Codigo: {{ $miwhats->codigo }}
+                                            Codigo: {{ $miwhats->codigo }}
                                             <br>
-                                            -> Telefono: {{ $miwhats->telefono }}
+                                            Telefono: {{ $miwhats->telefono }}            
                                             <br>
-                                            -> Creado: {{ $miwhats->created_at }}
+                                            T. Envios: N° {{ count($mieventos) }}
                                             <br>
-                                            -> Total Chats: N° {{ count($mieventos) }}
+                                            Slug:  {{ $miwhats->slug }}
                                             <br>
-                                            -> Numero:  {{ $miwhats->number }}
+                                            Default:  {{ $miwhats->default ? 'ACTIVO' : 'INACTIVO' }}
                                             <br>
-                                            -> Slug:  {{ $miwhats->slug }}
-                                            <br>
-                                            -> Default:  {{ $miwhats->default ? 'ACTIVO' : 'INACTIVO' }}
+                                            {{ $miwhats->created_at }}
                                         </code>
                                         @if(!$miwhats->estado)
                                             <a href="#" class="btn btn-danger btn-block" onclick="activar()" >ACTIVAR EL BOT</a>
@@ -78,19 +76,19 @@
                                         @endif
 
                                         <hr>
-                                        <h4 class="text-center">CONSULTAS</h4>
+                                        <!-- <h4 class="text-center">CONSULTAS</h4>
 
                                         <a href="#" class="btn btn-dark btn-block" onclick="michats()" >Todos los Chats</a>
                                         <a href="#" class="btn btn-dark btn-block" onclick="miestados()" >Estados de Contactos</a>
                                         <a href="#" class="btn btn-dark btn-block" onclick="migrupo()" >Chats de Grupos</a>
                                         <a href="#" class="btn btn-dark btn-block" onclick="migrupo2()" >Multimedia de Grupos</a>
 
-                                        <hr>
+                                        <hr> -->
                                         <h4 class="text-center">Actualizar Registros</h4>
                                         <code>
-                                            -> Total Grupos: N° {{ count($migrupos) }}
+                                            T. Grupos: N° {{ count($migrupos) }}
                                             <br>
-                                            -> Total Contactos: N° {{ count($micontactos) }}
+                                            T. Contactos: N° {{ count($micontactos) }}
                                         </code>                                        
                                         <a href="#" class="btn btn-dark btn-block" onclick="micontactos()" >Contactos</a>
                                         <a href="#" class="btn btn-dark btn-block" onclick="migrupos()" >Grupos</a>
@@ -154,7 +152,7 @@
                     var milink = "{{ asset('storage') }}" 
                     milink = milink+"/"+miwhats.file
                     $("#misocket").prepend("<hr style='border-top: 1px solid #2D353E;'>")
-                    console.log(e.message)
+                    // console.log(e.message)
                     if (miwhats.mensaje) {
                         var messages = miwhats.mensaje
                         // for(var i=0; i< messages.length; i++) {
@@ -297,11 +295,11 @@
         }
 
         async function micontactos(){
-            await axios.post("{{ env('APP_BOT') }}/contactos?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}")
+            await axios.post("{{ env('APP_BOT') }}/contactos?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}&user_id={{ Auth::user()->id }}")
         }
 
         async function migrupos(){
-            await axios.post("{{ env('APP_BOT') }}/historial?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}")
+            await axios.post("{{ env('APP_BOT') }}/historial?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}&user_id={{ Auth::user()->id }}")
         }
 
         async function miestados(){
