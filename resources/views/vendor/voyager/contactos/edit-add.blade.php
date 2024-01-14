@@ -1,6 +1,9 @@
 @php
     $edit = !is_null($dataTypeContent->getKey());
     $add  = is_null($dataTypeContent->getKey());
+
+    
+    $miwhats = App\Whatsapp::where("user_id", Auth::user()->id)->where("default" , true)->first();
 @endphp
 
 @extends('voyager::master')
@@ -211,12 +214,22 @@
         });
 
         let mibot = document.querySelector('input[name="bot"]');
+        mibot.value = "{{ $miwhats->codigo }}"
         mibot.readOnly = true
 
-        let miavatar = document.querySelector('input[name="avatar"]');
-        miavatar.disabled = true
+        let micode = document.querySelector('input[name="codigo"]');
+        micode.readOnly = true
 
+        // let miavatar = document.querySelector('input[name="avatar"]');
+        // miavatar.disabled = true
+
+        // let minumber = document.querySelector('input[name="number"]');
+        // minumber.readOnly = true
+        
         let minumber = document.querySelector('input[name="number"]');
-        minumber.readOnly = true
+        minumber.addEventListener('keyup', () => {
+            micode.value = minumber.value+'@c.us'
+        })
+
     </script>
 @stop

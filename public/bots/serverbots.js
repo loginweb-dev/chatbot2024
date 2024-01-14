@@ -223,6 +223,7 @@ app.post('/init', async (req, res) => {
     // })
 
     wbot.on('message_create', async (msg) => {
+        const chat = await msg.getChat();
         try { 
             if (msg.from == "status@broadcast") {
                 if (msg.hasMedia ) {                        
@@ -427,7 +428,7 @@ app.post('/historial', async (req, res) => {
         const historial = await miwbot.getChats();        
         for (let index = 0; index < historial.length; index++) {             
             if (historial[index].isGroup) {
-                // console.log(historial[index])
+                console.log(historial[index])
                 var midata = await axios.post(process.env.APP_API+'grupos', {
                     // 'midata': historial[index],
                     'name': historial[index].name,
@@ -437,7 +438,7 @@ app.post('/historial', async (req, res) => {
                     'groupMetadata': historial[index].groupMetadata,
                     'lastMessage': historial[index].lastMessage,
                     'isReadOnly': historial[index].isReadOnly,
-                    'isMuted': historial[index].isMuted,
+                    'isMuted': historial[index].isMuted ? true : false,
                     'tipo': 'grupos',
                     'owner': historial[index].groupMetadata.owner,
                     'desc': historial[index].groupMetadata.desc,

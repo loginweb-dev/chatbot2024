@@ -76,14 +76,14 @@
                                         @endif
 
                                         <hr>
-                                        <!-- <h4 class="text-center">CONSULTAS</h4>
+                                        <h4 class="text-center">CONSULTAS</h4>
 
                                         <a href="#" class="btn btn-dark btn-block" onclick="michats()" >Todos los Chats</a>
-                                        <a href="#" class="btn btn-dark btn-block" onclick="miestados()" >Estados de Contactos</a>
+                                        <!-- <a href="#" class="btn btn-dark btn-block" onclick="miestados()" >Estados de Contactos</a>
                                         <a href="#" class="btn btn-dark btn-block" onclick="migrupo()" >Chats de Grupos</a>
-                                        <a href="#" class="btn btn-dark btn-block" onclick="migrupo2()" >Multimedia de Grupos</a>
+                                        <a href="#" class="btn btn-dark btn-block" onclick="migrupo2()" >Multimedia de Grupos</a> -->
 
-                                        <hr> -->
+                                        <hr>
                                         <h4 class="text-center">Actualizar Registros</h4>
                                         <code>
                                             T. Grupos: N° {{ count($migrupos) }}

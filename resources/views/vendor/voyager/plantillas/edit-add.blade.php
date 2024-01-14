@@ -13,8 +13,11 @@
         $contactos = App\Contacto::where("bot", $miwhats->codigo)->get();
         $grupos = App\Grupo::where("bot", $miwhats->codigo)->get();
     }
-    $mimulti = ($mitamplate->multimedia != '[]') ? (json_decode($mitamplate->multimedia))[0]->download_link : null;
-    
+    if($edit){
+        $mimulti = ($mitamplate->multimedia != '[]') ? (json_decode($mitamplate->multimedia))[0]->download_link : null;
+    }else{
+        $mimulti = null;
+    }
 @endphp
 
 @extends('voyager::master')
@@ -228,14 +231,8 @@
 
 
 
-       
-        // let myInput = document.querySelector('input[name="user_id"]');
-        let mimensaje = document.querySelector('textarea[name="mensaje"]');
-        // myInput.readOnly = true
-
-        @if($add)
-            myInput.value = "{{ $miuser->id }}"    
-        @else
+        @if($edit)
+            let mimensaje = document.querySelector('textarea[name="mensaje"]');
 
             let migrupos = document.querySelector('select[name="grupos[]"]');
             @foreach($grupos as $item)
@@ -244,7 +241,6 @@
                 option.text = "{{ $item->name }} | {{ $item->type }}";
                 migrupos.appendChild(option);
             @endforeach
-
 
             let micontactos = document.querySelector('select[name="contactos[]"]');
             @foreach($contactos as $item)
@@ -255,7 +251,6 @@
             @endforeach
 
     
-            console.log("{{ $mimulti }}")
             $( "#miform" ).on( "submit", async function( event ) {
                 // event.preventDefault()
 
@@ -267,7 +262,6 @@
                     multimedia: "{{ $mimulti }}",
                     id: "{{ $mitamplate->id }}"
                 }
-                // console.log(midata)
                 await axios.post("{{ env('APP_BOT') }}/template", midata)
             });
        
@@ -290,47 +284,54 @@
             $("#mygroup").append(miselect);
             miselect.addEventListener("change", function(e) {
                 var micount=0
+                micontactos.selectedIndex = -1
+
                 const allOptions = Array.from(migrupos.options).map(option => option.text);
                 allOptions.find((value, index) => {
                     if (value.indexOf(this.value) > -1) {
                         migrupos.options[index].selected = true
                         micount = micount + 1
-                        $("#mygroup").append(micount+" - "+migrupos.options[index].text+"<br>")
+                        toastr.info(micount+" - "+migrupos.options[index].text);
+                        // $("#mygroup").append(micount+" - "+migrupos.options[index].text+"<br>")
                     }
                 });
-                migrupos.disabled = true
-                miselect.disabled = true
+                // migrupos.disabled = true
+                // miselect.disabled = true
             });
 
             //micontacto-----------------------------------------------
             var midata = ["generico", "interesado", "cliente", "reseller"]
-            var miselect = document.createElement("select")
-            miselect.setAttribute('class', "form-control")
+            var miselect2 = document.createElement("select")
+            miselect2.setAttribute('class', "form-control")
 
             var option = document.createElement("option")
                 option.value = null
                 option.text = "Seleciona una clase de cliente"
-                miselect.appendChild(option)   
+                miselect2.appendChild(option)   
             for (let index = 0; index < midata.length; index++) {
                 option = document.createElement("option")
                 option.value = midata[index]
                 option.text = midata[index]
-                miselect.appendChild(option)            
+                miselect2.appendChild(option)            
             }
-            $("#mycontac").append(miselect);
-            miselect.addEventListener("change", function(e) {
-            var micount=0
-                const allOptions = Array.from(migrupos.options).map(option => option.text);
+            $("#mycontac").append(miselect2);
+
+            miselect2.addEventListener("change", function(e) {
+                var micount=0
+                micontactos.selectedIndex = -1
+        
+                const allOptions = Array.from(micontactos.options).map(option => option.text);
                 allOptions.find((value, index) => {
                     if (value.indexOf(this.value) > -1) {
-                        migrupos.options[index].selected = true
+                        micontactos.options[index].selected = true
                         micount = micount + 1
-                        $("#mycontac").append(micount+" - "+migrupos.options[index].text+"<br>")
+                        // $("#mycontac").append(micount+" - "+micontactos.options[index].text+"<br>")
+                        toastr.info(micount+" - "+micontactos.options[index].text);
                     }
                 });
                 
-                micontactos.disabled = true
-                miselect.disabled = true
+                // micontactos.disabled = true
+                // miselect2.disabled = true
             });
         @endif
     </script>

@@ -84,6 +84,7 @@ Route::post('/socket/grupos', function (Request $request) {
 			$mifind->name = $request->name;
 			$mifind->_id = json_encode($request->_id);
 			$mifind->desc = $request->desc;
+			$mifind->isMuted = $request->isMuted;
 			$mifind->groupMetadata = json_encode($request->groupMetadata);
 			$mifind->lastMessage = json_encode($request->lastMessage);
 			$mifind->owner = json_encode($request->owner);
@@ -233,7 +234,7 @@ Route::post('/grupo/find', function (Request $request) {
 
 Route::post('/whatsapp/listar', function (Request $request) {
 	return Evento::where('bot', $request->bot)
-	// ->where('created_at', '>=', date('Y-m-d'))
+	->where('created_at', '>=', date('Y-m-d'))
 	->orderBy('created_at', 'desc')
 	->with('contacto', 'grupo', 'miauthor')
 	->take(15)

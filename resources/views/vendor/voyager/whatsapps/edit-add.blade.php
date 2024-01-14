@@ -229,7 +229,6 @@
         @if($add)
             myInput.value = "{{ $miuser }}"        
             myInput2.addEventListener('keyup', () => {
-                // console.log(myInput2.value)
                 myInput3.value = '591'+myInput2.value+'@c.us'
             })
         @endif
