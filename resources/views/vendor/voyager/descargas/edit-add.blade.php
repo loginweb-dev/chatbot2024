@@ -216,25 +216,23 @@
         });
 
 
-        let myInput = document.querySelector('input[name="user_id"]');
+        // let myInput = document.querySelector('input[name="user_id"]');
         let myInput2 = document.querySelector('input[name="url"]');
         let myInput3 = document.querySelector('textarea[name="message"]');
         let myInput4 = document.querySelector('input[name="slug"]');
 
-        // let mibot = document.querySelector('input[name="bot"]');
-        // mibot.readOnly = true
+        // myInput.readOnly = true
+        myInput4.readOnly = true
+
         let migrupos = document.querySelector('select[name="grupos[]"]');
-        // console.log(migrupos)
         @foreach($grupos as $item)
             var option = document.createElement("option");
             option.value = "{{ $item->codigo }}";
             option.text = "{{ $item->name }} | {{ $item->type }}";
             migrupos.appendChild(option);
         @endforeach
-        // migrupos.options[0].selected = true
 
         let micontactos = document.querySelector('select[name="contactos[]"]');
-        // console.log(micontactos)
         @foreach($contactos as $item)
             var option = document.createElement("option");
             option.value = "{{ $item->codigo }}";
@@ -242,8 +240,7 @@
             micontactos.appendChild(option);
         @endforeach
 
-        myInput.readOnly = true
-        myInput4.readOnly = true
+  
         @if($add)
             myInput.value = "{{ $miuser->id }}"        
         @endif
@@ -262,10 +259,7 @@
             })
         });
 
-        // var migrupo = $('#mygroup');
-        // var inputs = document.getElementById('myuser').getElementsByTagName('input');
-        // inputs.setAttribute('value', 90)
-
+        //migrupo---------------------------------------------------
         var midata = ["negocios", "noticias", "propio", "miscelaneos", "adultos", "enlaces", "deportes", "privado", "memes"]
         var miselect = document.createElement("select")
         miselect.setAttribute('class', "form-control")
@@ -287,7 +281,6 @@
             allOptions.find((value, index) => {
                 if (value.indexOf(this.value) > -1) {
                     migrupos.options[index].selected = true
-                    // console.log(migrupos.options[index])
                     micount = micount + 1
                     $("#mygroup").append(micount+" - "+migrupos.options[index].text+"<br>")
                 }
@@ -296,6 +289,37 @@
             migrupos.disabled = true
             miselect.disabled = true
         });
-        // var mibot = document.getElementById('myuser').getElementsByTagName('input');
+
+        //micontacto-----------------------------------------------
+        var midata = ["generico", "interesado", "cliente", "reseller"]
+        var miselect = document.createElement("select")
+        miselect.setAttribute('class', "form-control")
+
+        var option = document.createElement("option")
+            option.value = null
+            option.text = "Seleciona una clase de cliente"
+            miselect.appendChild(option)   
+        for (let index = 0; index < midata.length; index++) {
+            option = document.createElement("option")
+            option.value = midata[index]
+            option.text = midata[index]
+            miselect.appendChild(option)            
+        }
+        $("#mycontac").append(miselect);
+        miselect.addEventListener("change", function(e) {
+           var micount=0
+            const allOptions = Array.from(migrupos.options).map(option => option.text);
+            allOptions.find((value, index) => {
+                if (value.indexOf(this.value) > -1) {
+                    migrupos.options[index].selected = true
+                    micount = micount + 1
+                    $("#mycontac").append(micount+" - "+migrupos.options[index].text+"<br>")
+                }
+            });
+            
+            micontactos.disabled = true
+            miselect.disabled = true
+        });
+
     </script>
 @stop

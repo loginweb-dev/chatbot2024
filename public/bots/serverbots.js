@@ -39,11 +39,7 @@ app.post('/init', async (req, res) => {
             clientId: req.query.nombre
         }),
         puppeteer: {
-            executablePath: '/usr/bin/google-chrome-stable'
-        },
-        puppeteer: {
-            headless: true,
-            ignoreDefaultArgs: ['--disable-extensions'],
+            executablePath: '/usr/bin/google-chrome-stable',
             args: ['--no-sandbox']
         }
     });
@@ -501,20 +497,63 @@ app.post('/template', async (req, res)=>{
     try {
 
         var miwbot = sessionstorage.getItem(req.body.bot)
+        var misend = false 
+        stats = { size: 0 }
         if (miwbot) {    
-            // grupos
+            // grupos            
             for (let index = 0; index < req.body.grupos.length; index++) {
-                const media = MessageMedia.fromFilePath('../storage/'+req.body.multimedia)
-                miwbot.sendMessage(req.body.grupos[index], media, {caption: req.body.message})
+                if (req.body.multimedia) {                    
+                    stats = fs.statSync('../storage/'+req.body.multimedia); 
+                    const media = MessageMedia.fromFilePath('../storage/'+req.body.multimedia)
+                    await miwbot.sendMessage(req.body.grupos[index], media, {caption: req.body.message}).then(() => {
+                        misend = true
+                        console.log("size: "+stats.size)
+                    }).catch(() => {
+                        misend = false
+                        console.log("no se envio el chat")
+                    })
+                }else{
+                    await miwbot.sendMessage(req.body.grupos[index], req.body.message).then(() => {
+                        misend = true
+                        console.log("si se envio el chat")
+                    }).catch(() => {
+                        misend = false
+                        console.log("no se envio el chat")
+                    })
+                }
                 console.log("mensaje enviado ...") 
             }
 
             //contactos
             for (let index = 0; index < req.body.contactos.length; index++) {
-                const media = MessageMedia.fromFilePath('../storage/'+req.body.multimedia)
-                miwbot.sendMessage(req.body.contactos[index], media, {caption: req.body.message})
+                if (req.body.multimedia) {   
+                    const media = MessageMedia.fromFilePath('../storage/'+req.body.multimedia)
+                    await miwbot.sendMessage(req.body.contactos[index], media, {caption: req.body.message}).then(() => {
+                        misend = true
+                        console.log("size: "+stats.size)
+                    }).catch(() => {
+                        misend = false
+                        console.log("no se envio el chat")
+                    })
+                }else{
+                    await miwbot.sendMessage(req.body.contactos[index], req.body.message).then(() => {
+                        misend = true
+                        console.log("si se envio el chat")
+                    }).catch(() => {
+                        misend = false
+                        console.log("no se envio el chat")
+                    })
+                }
                 console.log("mensaje enviado ...") 
             }
+
+            
+            //actualizar plantilla
+            await axios.post(process.env.APP_API+'template/update', {
+                'id': req.body.id,
+                'send': misend,
+                'size': stats.size
+            })
         }
     } catch (error) {
         console.log(error)
@@ -541,37 +580,45 @@ app.post('/download', async (req, res) => {
         ]);        
         console.log(stdout);
 
-        await axios.post(process.env.APP_API+'download/update', {
-            'slug': req.body.slug,
-            'file': req.body.name+'/'+req.body.slug+'.mp4'
-        })
+
 
         var miwbot = sessionstorage.getItem(req.body.bot)
-        if (miwbot) {    
+        if (miwbot) {
+            var stats = fs.statSync('../storage/'+req.body.name+'/'+req.body.slug+'.mp4');  
+            var misend = false                  
             // grupos
-            for (let index = 0; index < req.body.grupos.length; index++) {
-                var stats = fs.statSync('../storage/'+req.body.name+'/'+req.body.slug+'.mp4');
+            for (let index = 0; index < req.body.grupos.length; index++) {                
                 const media = MessageMedia.fromFilePath('../storage/'+req.body.name+'/'+req.body.slug+'.mp4')
-                miwbot.sendMessage(req.body.grupos[index], media, {caption: req.body.message})
-                await axios.post(process.env.APP_API+'grupo/update', {
-                    'codigo': req.body.grupos[index],
-                    'bot': req.body.bot
-                }) 
-                console.log("mensaje enviado.. SIZE: "+stats.size) 
+                await miwbot.sendMessage(req.body.grupos[index], media, {caption: req.body.message}).then(() => {
+                    misend = true
+                    console.log("size: "+stats.size)
+                }).catch(() => {
+                    misend = false
+                    console.log("no se envio el chat")
+                })
+    
             }
 
             //contactos
             for (let index = 0; index < req.body.contactos.length; index++) {
-                var stats = fs.statSync('../storage/'+req.body.name+'/'+req.body.slug+'.mp4');
                 const media = MessageMedia.fromFilePath('../storage/'+req.body.name+'/'+req.body.slug+'.mp4')
-                miwbot.sendMessage(req.body.contactos[index], media, {caption: req.body.message})
-                // miwbot.sendMessage(req.body.contactos[index], "mierda..")
-                await axios.post(process.env.APP_API+'contacto/update', {
-                    'codigo': req.body.grupos[index],
-                    'bot': req.body.bot
-                }) 
-                console.log("mensaje enviado.. SIZE: "+stats.size)  
+                await miwbot.sendMessage(req.body.grupos[index], media, {caption: req.body.message}).then(() => {
+                    misend = true
+                    console.log("size: "+stats.size)
+                }).catch(() => {
+                    misend = false
+                    console.log("no se envio el chat")
+                })
             }
+
+            //actualizar descarga
+            await axios.post(process.env.APP_API+'download/update', {
+                'slug': req.body.slug,
+                'file': req.body.name+'/'+req.body.slug+'.mp4',
+                'send': misend,
+                'size': stats.size
+            })
+      
         }
     } catch (error) {
         console.log(error)

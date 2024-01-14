@@ -3,9 +3,18 @@
     $add  = is_null($dataTypeContent->getKey());
     $miuser = Auth::user(); 
     $miwhats = App\Whatsapp::where("user_id", $miuser->id)->where("default" , true)->first();
-    $contactos = App\Contacto::where("bot", $miwhats->codigo)->get();
-    $grupos = App\Grupo::where("bot", $miwhats->codigo)->get();
+
     $mitamplate = App\Plantilla::find($dataTypeContent->getKey());
+
+    if(Auth::user()->role_id == 1){
+        $contactos = App\Contacto::all();
+        $grupos = App\Grupo::all();
+    }else{
+        $contactos = App\Contacto::where("bot", $miwhats->codigo)->get();
+        $grupos = App\Grupo::where("bot", $miwhats->codigo)->get();
+    }
+    $mimulti = ($mitamplate->multimedia != '[]') ? (json_decode($mitamplate->multimedia))[0]->download_link : null;
+    
 @endphp
 
 @extends('voyager::master')
@@ -217,87 +226,112 @@
         });
 
 
-        let myInput = document.querySelector('input[name="user_id"]');
-        let mimensaje = document.querySelector('textarea[name="mensaje"]');
-        // let mimultimedia = document.querySelector('input[name="multimedia[]"]');
 
-        // console.log(mimultimedia)
-
-        let migrupos = document.querySelector('select[name="grupos[]"]');
-        // console.log(migrupos)
-        @foreach($grupos as $item)
-            var option = document.createElement("option");
-            option.value = "{{ $item->codigo }}";
-            option.text = "{{ $item->name }} | {{ $item->type }}";
-            migrupos.appendChild(option);
-        @endforeach
-
-
-        let micontactos = document.querySelector('select[name="contactos[]"]');
-        // console.log(micontactos)
-        @foreach($contactos as $item)
-            var option = document.createElement("option");
-            option.value = "{{ $item->codigo }}";
-            option.text = "{{ $item->name }} | {{ $item->number }}";
-            micontactos.appendChild(option);
-        @endforeach
-
-        myInput.readOnly = true
-        // myInput4.readOnly = true
 
        
+        // let myInput = document.querySelector('input[name="user_id"]');
+        let mimensaje = document.querySelector('textarea[name="mensaje"]');
+        // myInput.readOnly = true
+
         @if($add)
-            var mimultimedia =  null
             myInput.value = "{{ $miuser->id }}"    
         @else
-            mimultimedia =  "{{ $mitamplate->multimedia ? (json_decode($mitamplate->multimedia))[0]->download_link :  null }}"
-        @endif
 
-        console.log(mimultimedia)
-        $( "#miform" ).on( "submit", async function( event ) {
-            // event.preventDefault()
-
-            var midata = {
-                grupos: Array.from(migrupos.selectedOptions).map(({ value }) => value),
-                contactos: Array.from(micontactos.selectedOptions).map(({ value }) => value),
-                bot: "{{ $miwhats->slug }}",
-                message: mimensaje.value,
-                multimedia: mimultimedia
-            }
-
-            console.log(midata)
-            await axios.post("{{ env('APP_BOT') }}/template", midata)
-        });
+            let migrupos = document.querySelector('select[name="grupos[]"]');
+            @foreach($grupos as $item)
+                var option = document.createElement("option");
+                option.value = "{{ $item->codigo }}";
+                option.text = "{{ $item->name }} | {{ $item->type }}";
+                migrupos.appendChild(option);
+            @endforeach
 
 
-        var midata = ["negocios", "noticias", "propio", "miscelaneos", "adultos", "enlaces", "deportes", "privado", "memes"]
-        var miselect = document.createElement("select")
-        miselect.setAttribute('class', "form-control")
+            let micontactos = document.querySelector('select[name="contactos[]"]');
+            @foreach($contactos as $item)
+                var option = document.createElement("option");
+                option.value = "{{ $item->codigo }}";
+                option.text = "{{ $item->name }} | {{ $item->number }}";
+                micontactos.appendChild(option);
+            @endforeach
 
-        var option = document.createElement("option")
-            option.value = null
-            option.text = "Seleciona un tipo grupo"
-            miselect.appendChild(option)   
-        for (let index = 0; index < midata.length; index++) {
-            option = document.createElement("option")
-            option.value = midata[index]
-            option.text = midata[index]
-            miselect.appendChild(option)            
-        }
-        $("#mygroup").append(miselect);
-        miselect.addEventListener("change", function(e) {
-            var micount=0
-            const allOptions = Array.from(migrupos.options).map(option => option.text);
-            allOptions.find((value, index) => {
-                if (value.indexOf(this.value) > -1) {
-                    migrupos.options[index].selected = true
-                    // console.log(migrupos.options[index])
-                    micount = micount + 1
-                    $("#mygroup").append(micount+" - "+migrupos.options[index].text+"<br>")
+    
+            console.log("{{ $mimulti }}")
+            $( "#miform" ).on( "submit", async function( event ) {
+                // event.preventDefault()
+
+                var midata = {
+                    grupos: Array.from(migrupos.selectedOptions).map(({ value }) => value),
+                    contactos: Array.from(micontactos.selectedOptions).map(({ value }) => value),
+                    bot: "{{ $miwhats->slug }}",
+                    message: mimensaje.value,
+                    multimedia: "{{ $mimulti }}",
+                    id: "{{ $mitamplate->id }}"
                 }
+                // console.log(midata)
+                await axios.post("{{ env('APP_BOT') }}/template", midata)
             });
-            migrupos.disabled = true
-            miselect.disabled = true
-        });
+       
+
+            //gurpos----------------------------------
+            var midata = ["negocios", "noticias", "propio", "miscelaneos", "adultos", "enlaces", "deportes", "privado", "memes"]
+            var miselect = document.createElement("select")
+            miselect.setAttribute('class', "form-control")
+
+            var option = document.createElement("option")
+                option.value = null
+                option.text = "Seleciona un tipo grupo"
+                miselect.appendChild(option)   
+            for (let index = 0; index < midata.length; index++) {
+                option = document.createElement("option")
+                option.value = midata[index]
+                option.text = midata[index]
+                miselect.appendChild(option)            
+            }
+            $("#mygroup").append(miselect);
+            miselect.addEventListener("change", function(e) {
+                var micount=0
+                const allOptions = Array.from(migrupos.options).map(option => option.text);
+                allOptions.find((value, index) => {
+                    if (value.indexOf(this.value) > -1) {
+                        migrupos.options[index].selected = true
+                        micount = micount + 1
+                        $("#mygroup").append(micount+" - "+migrupos.options[index].text+"<br>")
+                    }
+                });
+                migrupos.disabled = true
+                miselect.disabled = true
+            });
+
+            //micontacto-----------------------------------------------
+            var midata = ["generico", "interesado", "cliente", "reseller"]
+            var miselect = document.createElement("select")
+            miselect.setAttribute('class', "form-control")
+
+            var option = document.createElement("option")
+                option.value = null
+                option.text = "Seleciona una clase de cliente"
+                miselect.appendChild(option)   
+            for (let index = 0; index < midata.length; index++) {
+                option = document.createElement("option")
+                option.value = midata[index]
+                option.text = midata[index]
+                miselect.appendChild(option)            
+            }
+            $("#mycontac").append(miselect);
+            miselect.addEventListener("change", function(e) {
+            var micount=0
+                const allOptions = Array.from(migrupos.options).map(option => option.text);
+                allOptions.find((value, index) => {
+                    if (value.indexOf(this.value) > -1) {
+                        migrupos.options[index].selected = true
+                        micount = micount + 1
+                        $("#mycontac").append(micount+" - "+migrupos.options[index].text+"<br>")
+                    }
+                });
+                
+                micontactos.disabled = true
+                miselect.disabled = true
+            });
+        @endif
     </script>
 @stop
