@@ -242,7 +242,11 @@
 
   
         @if($add)
-            myInput.value = "{{ $miuser->id }}"        
+            var miname = document.querySelector('input[name="name"]')
+            var mislug = document.querySelector('input[name="slug"]')
+            let newname = (Math.random() + 1).toString(36).substring(3);
+            miname.value = newname
+            mislug.value = newname
         @endif
 
         $( "#miform" ).on( "submit", async function( event ) {

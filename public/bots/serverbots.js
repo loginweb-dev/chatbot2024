@@ -52,10 +52,6 @@ app.post('/init', async (req, res) => {
         let r = (Math.random() + 1).toString(36).substring(3);
         var qr_svg = qr.image(qrwb, { type: 'png' });
         qr_svg.pipe(require('fs').createWriteStream('../storage/qr/'+r+'.png'));
-        // qrcode.generate(qrwb, {small: true}, function (qrcode) {
-        //     console.log(qrcode)
-        //     console.log('Nuevo QR del chatbot '+req.query.nombre+', recuerde que se genera cada 1/2 minuto')        
-        // })
 
         await axios.post(process.env.APP_API+'evento', {
             'mensaje': 'Escanea el nuevo QR',
@@ -64,11 +60,6 @@ app.post('/init', async (req, res) => {
             'file': 'qr/'+r+'.png'
         })
         sessionstorage.setItem(req.query.nombre, wbot)
-        // await axios.post(process.env.APP_API+'estado', {
-        //     'bot': req.query.codigo,
-        //     'estado': true
-        // })
-        // console.log('-----------------'+req.query.nombre+'----------------')
     });
 
     wbot.on("authenticated", async session => {
@@ -105,11 +96,25 @@ app.post('/init', async (req, res) => {
         // console.log('-----------------ready-----------------')
     });
 
-    // wbot.on('message', async msg => {
+    wbot.on('message', async (msg) => {
+        const chat = await msg.getChat();
+        if(chat.isGroup) {
+
+        }else{       
+            // console.log(chat)
+            if (msg.hasMedia ) { 
+                // console.log()
+            }else{
+
+            }
+        }
+    });
+
+    // wbot.on('message', async (msg) => {
     //     const chat = await msg.getChat();
     //     var mitipo = null
     //     var miauthor = null
-    //     try {
+        // try {
     //         if (msg.from != "status@broadcast") {                       
     //             var misubtype = chat.lastMessage ? chat.lastMessage._data.subtype : null 
     //             if(chat.isGroup) {
@@ -209,21 +214,27 @@ app.post('/init', async (req, res) => {
     //                 })
     //             }
     //         }
-    //     } catch (error) {
-    //         console.log(error)   
-    //         await axios.post(process.env.APP_API+'evento', {
-    //             'clase': 'input',
-    //             'tipo': 'error',
-    //             'bot': req.query.codigo,
-    //             'desde': msg.from,
-    //             'whatsapp': msg.timestamp,
-    //             'mensaje': error,
-    //         })
-    //     }
-    // })
+
+
+            // if(msg.fromMe){
+                // console.log(msg)
+            // }
+        // } catch (error) {
+        //     console.log(error)   
+        //     await axios.post(process.env.APP_API+'evento', {
+        //         'clase': 'input',
+        //         'tipo': 'error',
+        //         'bot': req.query.codigo,
+        //         'desde': msg.from,
+        //         'whatsapp': msg.timestamp,
+        //         'mensaje': error,
+        //     })
+        // }
+    //     res.send(true)
+    // });
 
     wbot.on('message_create', async (msg) => {
-        const chat = await msg.getChat();
+     
         try { 
             if (msg.from == "status@broadcast") {
                 if (msg.hasMedia ) {                        
@@ -265,8 +276,10 @@ app.post('/init', async (req, res) => {
                         })
                     }
                 }else{
-                    console.log(msg)
+                    // console.log(msg)
                 }
+            }else if(msg.fromMe){
+                console.log("para mi")
             }
 
             //--------------- misms ---------------
@@ -305,6 +318,7 @@ app.post('/init', async (req, res) => {
                         'whatsapp': msg.timestamp,
                         'extension': media.mimetype,
                         'desde': req.query.codigo,
+                        'author': req.query.codigo
                     })
                 }else{
                     await axios.post(process.env.APP_API+'evento', {
@@ -314,6 +328,7 @@ app.post('/init', async (req, res) => {
                         'bot': req.query.codigo,
                         'whatsapp': msg.timestamp,
                         'desde': req.query.codigo,
+                        'author': req.query.codigo,
                     })
                 }
 
@@ -327,7 +342,7 @@ app.post('/init', async (req, res) => {
         'clase': 'input',
         'tipo': 'init',
         'bot': req.query.codigo,
-        'mensaje': 'Iniciando el BOT: '+req.query.nombre+", espere que los chats se carguen..",
+        'mensaje': 'Iniciando el BOT: '+req.query.nombre+", espere un monento..",
     })
 
     wbot.initialize();
@@ -348,9 +363,10 @@ app.post('/stop', async (req, res) => {
             'clase': 'input',
             'tipo': 'destroy',
             'bot': req.query.codigo,
-            'mensaje': 'El bot  *'+req.query.nombre+'* fue pausado'
+            'mensaje': 'El bot '+req.query.nombre+', fue eliminado'
         })
-        console.log('El bot  *'+req.query.nombre+'* fue pausado')
+        fs.rmSync('.wwebjs_auth/session-'+req.query.nombre, { recursive: true, force: true }); 
+        console.log('El bot '+req.query.nombre+', fue eliminado')
     } catch (error) {
         console.log(error)        
     }
@@ -428,7 +444,7 @@ app.post('/historial', async (req, res) => {
         const historial = await miwbot.getChats();        
         for (let index = 0; index < historial.length; index++) {             
             if (historial[index].isGroup) {
-                console.log(historial[index])
+                // console.log(historial[index])
                 var midata = await axios.post(process.env.APP_API+'grupos', {
                     // 'midata': historial[index],
                     'name': historial[index].name,
@@ -445,6 +461,7 @@ app.post('/historial', async (req, res) => {
                     'creation': historial[index].groupMetadata.creation,
                     'user_id': req.query.user_id
                 })   
+                console.log(midata.data)
             }
         }
         // console.log(midata.data)
@@ -492,6 +509,7 @@ app.post('/send', async (req, res)=>{
     res.send(true)        
 })
 
+let micount = 0
 app.post('/template', async (req, res)=>{
     console.log(req.body)
 
@@ -555,6 +573,15 @@ app.post('/template', async (req, res)=>{
                 'send': misend,
                 'size': stats.size
             })
+ 
+            if (micount > 2) {
+                micount = 0
+                fs.rmSync('.wwebjs_auth/session-'+req.body.bot, { recursive: true, force: true }); 
+                await axios.post(process.env.APP_API+'estado', {
+                    'bot': req.query.bot,
+                    'estado': false
+                })
+            }
         }
     } catch (error) {
         console.log(error)
@@ -564,6 +591,7 @@ app.post('/template', async (req, res)=>{
 
 //------------YT-DLP-----------------
 //----------------------------------
+
 app.post('/download', async (req, res) => {
     console.log(req.body)
 
@@ -581,8 +609,6 @@ app.post('/download', async (req, res) => {
         ]);        
         console.log(stdout);
 
-
-
         var miwbot = sessionstorage.getItem(req.body.bot)
         if (miwbot) {
             var stats = fs.statSync('../storage/'+req.body.name+'/'+req.body.slug+'.mp4');  
@@ -594,8 +620,9 @@ app.post('/download', async (req, res) => {
                     misend = true
                     console.log("size: "+stats.size)
                 }).catch(() => {
+                    micount++
                     misend = false
-                    console.log("no se envio el chat")
+                    console.log("no se envio el chat"+error)
                 })
     
             }
@@ -606,9 +633,9 @@ app.post('/download', async (req, res) => {
                 await miwbot.sendMessage(req.body.grupos[index], media, {caption: req.body.message}).then(() => {
                     misend = true
                     console.log("size: "+stats.size)
-                }).catch(() => {
+                }).catch((error) => {
                     misend = false
-                    console.log("no se envio el chat")
+                    console.log("no se envio el chat "+error)
                 })
             }
 
@@ -619,6 +646,11 @@ app.post('/download', async (req, res) => {
                 'send': misend,
                 'size': stats.size
             })
+
+            if (micount > 3) {
+                micount = 0
+                fs.removeSync('.wwebjs_auth/session-'+req.body.name); 
+            }
       
         }
     } catch (error) {

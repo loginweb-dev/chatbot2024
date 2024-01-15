@@ -69,10 +69,10 @@
                                             {{ $miwhats->created_at }}
                                         </code>
                                         @if(!$miwhats->estado)
-                                            <a href="#" class="btn btn-danger btn-block" onclick="activar()" >ACTIVAR EL BOT</a>
+                                            <a href="#" id="miactivar" class="btn btn-danger btn-block" onclick="activar()" >ACTIVAR EL BOT</a>
                                             <br>
                                         @else
-                                            <a href="#" class="btn btn-dark btn-block" onclick="stop()" >INACTIVAR</a>                  
+                                            <a href="#" id="miactivar" class="btn btn-dark btn-block" onclick="stop()" >INACTIVAR</a>                  
                                         @endif
 
                                         <hr>
@@ -288,10 +288,13 @@
 
         async function activar(){
             await axios.post("{{ env('APP_BOT') }}/init?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}") 
+            $("#miactivar").hide()
         }
 
         async function stop(){
             var mirest = await axios.post("{{ env('APP_BOT') }}/stop?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}") 
+            // $("#miactivar").hide()
+            location.reload()
         }
 
         async function micontactos(){

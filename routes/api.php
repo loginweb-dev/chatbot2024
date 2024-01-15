@@ -11,6 +11,8 @@ use App\Whatsapp;
 use App\Contacto;
 use App\Descarga;
 use App\Plantilla;
+use App\Product;
+use App\Supplier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -114,12 +116,16 @@ Route::post('/socket/grupos', function (Request $request) {
 			'fwhats' => date('Y-m-d H:i:s'),
 			'tipo' => $request->tipo
 		]));
-		return $mifind;
+		return response()->json([
+			'message' => 'Grupo ingresado: '.$request->name
+		]);;
 	} catch (Exception $e) {
 		event(new MiEvent([
 			'error' => 'grupo'
 		]));
-    	return $e;
+    	return response()->json([
+			'error' => 'grupo'
+		]);;
 	}
 
 });
@@ -341,5 +347,29 @@ Route::post('/socket/template/update', function (Request $request) {
 	event(new MiEvent([
 		'tipo' => 'template'
 	]));
+	return true;
+});
+
+
+//paneles----------------
+Route::post('/paneles/create', function (Request $request) {
+
+	$provee = Supplier::all();
+	foreach ($provee as $value) {
+		$mifind = Product::where("user_id", $request->user_id)->where("supplier_id", $value->id)->first();
+		if ($mifind) {
+			$mifind->name =  $value->name;
+			$mifind->image =  $value->image;
+			$mifind->save();
+		}else{	
+			Product::create([
+				'user_id' => $request->user_id,
+				'name' => $value->name,
+				'image' => $value->image,
+				'supplier_id' => $value->id,
+				'credit' => 0
+			]);
+		}
+	}
 	return true;
 });

@@ -157,6 +157,7 @@
 @section('javascript')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
     <script>
+    
         var params = {};
         var $file;
 
@@ -240,6 +241,7 @@
                 option.value = "{{ $item->codigo }}";
                 option.text = "{{ $item->name }} | {{ $item->type }}";
                 migrupos.appendChild(option);
+                console.log("{{ $item->name }}")
             @endforeach
 
             let micontactos = document.querySelector('select[name="contactos[]"]');
