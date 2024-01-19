@@ -64,7 +64,7 @@
                                             <br>
                                             Slug:  {{ $miwhats->slug }}
                                             <br>
-                                            Default:  {{ $miwhats->default ? 'ACTIVO' : 'INACTIVO' }}
+                                            Default:  {{ $miwhats->default ? 'SI' : 'NO' }}
                                             <br>
                                             {{ $miwhats->created_at }}
                                         </code>
@@ -78,9 +78,9 @@
                                         <hr>
                                         <h4 class="text-center">CONSULTAS</h4>
 
-                                        <a href="#" class="btn btn-dark btn-block" onclick="michats()" >Todos los Chats</a>
-                                        <!-- <a href="#" class="btn btn-dark btn-block" onclick="miestados()" >Estados de Contactos</a>
-                                        <a href="#" class="btn btn-dark btn-block" onclick="migrupo()" >Chats de Grupos</a>
+                                        <a href="#" class="btn btn-dark btn-block" onclick="michats()" >T. los Chats</a>
+                                         <a href="#" class="btn btn-dark btn-block" onclick="miestados()" >T. los Estados</a>
+                                        <!--<a href="#" class="btn btn-dark btn-block" onclick="migrupo()" >Chats de Grupos</a>
                                         <a href="#" class="btn btn-dark btn-block" onclick="migrupo2()" >Multimedia de Grupos</a> -->
 
                                         <hr>
@@ -393,7 +393,7 @@
                         break;
                     case "chat_private":             
                         var micontacto = miwhats[index].contacto ? miwhats[index].contacto.name : miwhats[index].desde                                    
-                        $("#misocket").append("<div class='datestamp-container'><span class='datestamp'>"+micontacto+" | "+miwhats[index].fwhats+"</span></div>")
+                        $("#misocket").append("<div class='datestamp-container'><span class='datestamp'>"+miwhats[index].id+" | "+micontacto+" | "+miwhats[index].fwhats+"</span></div>")
                         break;
                     case "chat_group":
                         var miauthor = miwhats[index].miauthor ? miwhats[index].miauthor.name : miwhats[index].author;

@@ -196,6 +196,7 @@ return [
     'additional_js' => [
     	// 'js/app.js',
     	// 'js/miapp.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js'
     ],
 
     'googlemaps' => [

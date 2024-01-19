@@ -1,9 +1,8 @@
 @php
     $edit = !is_null($dataTypeContent->getKey());
     $add  = is_null($dataTypeContent->getKey());
-
-    
     $miwhats = App\Whatsapp::where("user_id", Auth::user()->id)->where("default" , true)->first();
+
 @endphp
 
 @extends('voyager::master')
@@ -14,13 +13,23 @@
 
 @section('page_title', __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->getTranslatedAttribute('display_name_singular'))
 
-@section('page_header')
-    <h1 class="page-title">
-        <i class="{{ $dataType->icon }}"></i>
-        {{ __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->getTranslatedAttribute('display_name_singular') }} | BOT: {{ $miwhats->nombre }} | TEL: {{ $miwhats->telefono }}
-    </h1>
-    @include('voyager::multilingual.language-selector')
-@stop
+
+@if(Auth::user()->role_id == 1)
+    @section('page_header')
+        <h1 class="page-title">
+            <i class="{{ $dataType->icon }}"></i>
+            {{ __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->getTranslatedAttribute('display_name_singular') }}
+        </h1>
+        @include('voyager::multilingual.language-selector')
+    @stop
+@else 
+    @section('page_header')
+        <h1 class="page-title">
+            <i class="{{ $dataType->icon }}"></i>
+            {{ __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->getTranslatedAttribute('display_name_singular') }} | BOT: {{ $miwhats->nombre }} | TEL: {{ $miwhats->telefono }}
+        </h1>
+    @stop
+@endif
 
 @section('content')
     <div class="page-content edit-add container-fluid">
@@ -32,7 +41,7 @@
                     <form role="form"
                             class="form-edit-add"
                             action="{{ $edit ? route('voyager.'.$dataType->slug.'.update', $dataTypeContent->getKey()) : route('voyager.'.$dataType->slug.'.store') }}"
-                            method="POST" enctype="multipart/form-data">
+                            method="POST" enctype="multipart/form-data" id="miform">
                         <!-- PUT Method if we are editing -->
                         @if($edit)
                             {{ method_field("PUT") }}
@@ -101,7 +110,9 @@
 
                         <div class="panel-footer">
                             @section('submit-buttons')
-                                <button type="submit" class="btn btn-primary save">{{ __('voyager::generic.save') }}</button>
+                               
+                                    <button type="submit" class="btn btn-primary save">{{ __('voyager::generic.save') }}</button>
+                               
                             @stop
                             @yield('submit-buttons')
                         </div>
@@ -213,23 +224,36 @@
             $('[data-toggle="tooltip"]').tooltip();
         });
 
-        let mibot = document.querySelector('input[name="bot"]');
-        mibot.value = "{{ $miwhats->codigo }}"
-        mibot.readOnly = true
 
-        let micode = document.querySelector('input[name="codigo"]');
-        micode.readOnly = true
+        var value1 = document.querySelector('input[name="price"]')
+        value1.readOnly = true
 
-        // let miavatar = document.querySelector('input[name="avatar"]');
-        // miavatar.disabled = true
+        var value2 = document.querySelector('input[name="credit"]')
+        value2.readOnly = true
 
-        // let minumber = document.querySelector('input[name="number"]');
-        // minumber.readOnly = true
+        var value4 = document.querySelector('input[name="expiration"]')
+        value4.readOnly = true
+
+        $("#micontac").append("<a href='#' onclick='mifunction()' class='btn btn-dark btn-block'><<< Agregar Contacto >>></a>");
+
+        function mifunction() {
+            location.href = "/admin/contactos/create"
+        }
+
         
-        let minumber = document.querySelector('input[name="number"]');
-        minumber.addEventListener('keyup', () => {
-            micode.value = minumber.value+'@c.us'
-        })
+        var value3 = document.querySelector('textarea[name="credentials"]')
+        // console.log(value3.value)
+        $( "#miform" ).on( "submit", async function( event ) {
+            // event.preventDefault()
 
+            var midata = {
+                slug: "{{ $miwhats->slug }}",
+                message: value3.value,
+                phone: "59171130523@c.us"
+            }
+            await axios.post("{{ env('APP_BOT') }}/send", midata)
+
+        });
+   
     </script>
 @stop

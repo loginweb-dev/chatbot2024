@@ -31,7 +31,7 @@
 @section('page_header')
     <h1 class="page-title">
         <i class="{{ $dataType->icon }}"></i>
-        {{ __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->getTranslatedAttribute('display_name_singular') }}
+        {{ __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->getTranslatedAttribute('display_name_singular') }} | BOT: {{ $miwhats->nombre }} | TEL: {{ $miwhats->telefono }}
     </h1>
     @include('voyager::multilingual.language-selector')
 @stop
@@ -155,7 +155,6 @@
 @stop
 
 @section('javascript')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
     <script>
     
         var params = {};
@@ -327,13 +326,11 @@
                     if (value.indexOf(this.value) > -1) {
                         micontactos.options[index].selected = true
                         micount = micount + 1
-                        // $("#mycontac").append(micount+" - "+micontactos.options[index].text+"<br>")
+             
                         toastr.info(micount+" - "+micontactos.options[index].text);
                     }
                 });
                 
-                // micontactos.disabled = true
-                // miselect2.disabled = true
             });
         @endif
     </script>

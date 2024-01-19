@@ -15,7 +15,7 @@ use App\Product;
 use App\Supplier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
+// use Illuminate\Support\Facades\Auth;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -240,16 +240,16 @@ Route::post('/grupo/find', function (Request $request) {
 
 Route::post('/whatsapp/listar', function (Request $request) {
 	return Evento::where('bot', $request->bot)
-	->where('created_at', '>=', date('Y-m-d'))
+	// ->where('created_at', '>=', date('Y-m-d'))
 	->orderBy('created_at', 'desc')
 	->with('contacto', 'grupo', 'miauthor')
-	->take(15)
+	->take(100)
 	->get();
 });
 
 Route::post('/whatsapp/chats', function (Request $request) {
 	return Evento::where('bot', $request->codigo)
-	->where('created_at', '>=', date('Y-m-d'))
+	// ->where('created_at', '>=', date('Y-m-d'))
 	->orderBy('created_at', 'desc')
 	->with('contacto', 'grupo', 'miauthor')
 	->get();
@@ -257,7 +257,7 @@ Route::post('/whatsapp/chats', function (Request $request) {
 
 Route::post('/whatsapp/estados', function (Request $request) {
 	return Evento::where("bot", $request->codigo)
-		->where('created_at', '>=', date('Y-m-d'))
+		// ->where('created_at', '>=', date('Y-m-d'))
 		->where('subtipo', 'status')
 		->orderBy('created_at', 'desc')
 		->with('contacto', 'grupo', 'miauthor')
@@ -325,7 +325,6 @@ Route::post('/ai/mistral', function (Request $request) {
 
 
 /// download ---------------------
-
 Route::post('/socket/download/update', function (Request $request) {
 	$midata = Descarga::where('slug', $request->slug)->first();
 	$midata->file = $request->file;
@@ -359,12 +358,14 @@ Route::post('/paneles/create', function (Request $request) {
 		$mifind = Product::where("user_id", $request->user_id)->where("supplier_id", $value->id)->first();
 		if ($mifind) {
 			$mifind->name =  $value->name;
+			$mifind->price =  $value->price;
 			$mifind->image =  $value->image;
 			$mifind->save();
 		}else{	
 			Product::create([
 				'user_id' => $request->user_id,
 				'name' => $value->name,
+				'price' => $value->price,
 				'image' => $value->image,
 				'supplier_id' => $value->id,
 				'credit' => 0

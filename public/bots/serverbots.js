@@ -81,7 +81,7 @@ app.post('/init', async (req, res) => {
         console.log('ready');
         try {
             await axios.post(process.env.APP_API+'evento', {
-                'mensaje': 'Bot *'+req.query.nombre+'* esta linea',
+                'mensaje': 'Bot '+req.query.nombre+' esta linea',
                 'tipo': 'ready',
                 'bot': req.query.codigo
             })
@@ -98,140 +98,127 @@ app.post('/init', async (req, res) => {
 
     wbot.on('message', async (msg) => {
         const chat = await msg.getChat();
-        if(chat.isGroup) {
+        var mitipo = null
+        var miauthor = null
 
-        }else{       
-            // console.log(chat)
-            if (msg.hasMedia ) { 
-                // console.log()
-            }else{
+        console.log(req.query)
+        try {
+            if (msg.from != "status@broadcast") {                       
+                var misubtype = chat.lastMessage ? chat.lastMessage._data.subtype : null 
+                if(chat.isGroup) {
+                    mitipo = 'chat_group'
+                    miauthor = chat.lastMessage ? chat.lastMessage.author : null
+                }else{       
+                    mitipo = 'chat_private'
+                    miauthor = null
+                }
+        
+                if(msg.hasMedia) {    
+                    const media = await msg.downloadMedia(); 
+                    if (media) {           
+                            
+                        let r = (Math.random() + 1).toString(36).substring(3);
+                        let mifile = null   
+                        
+                        const imgBuffer = Buffer.from(media.data, 'base64');
+                        if (!fs.existsSync('../storage/'+req.query.nombre)){
+                            fs.mkdirSync('../storage/'+req.query.nombre);
+                        }
 
+                        switch (media.mimetype) {
+                            case 'image/jpeg':
+                                fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.jpeg', imgBuffer);
+                                mifile = req.query.nombre+'/'+r+'.jpeg'
+                                break;
+                            case 'image/webp':
+                                fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.webp', imgBuffer);
+                                mifile = req.query.nombre+'/'+r+'.webp'
+                                break;
+                            case 'video/mp4':
+                                fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.mp4', imgBuffer);
+                                mifile = req.query.nombre+'/'+r+'.mp4'
+                                break;
+                            case 'audio/ogg; codecs=opus':
+                                fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.ogg', imgBuffer);
+                                mifile = req.query.nombre+'/'+r+'.ogg'
+                                break;
+                            case 'audio/mp4':
+                                fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.mp4', imgBuffer);
+                                mifile = req.query.nombre+'/'+r+'.mp4'
+                                break;
+                            case 'application/zip':
+                                fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.zip', imgBuffer);
+                                mifile = req.query.nombre+'/'+r+'.zip'
+                                break;
+                            case 'application/pdf':
+                                fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.pdf', imgBuffer);
+                                mifile = req.query.nombre+'/'+r+'.pdf'
+                                break;
+                            default:
+                                
+                                break;
+                        }
+                
+                        await axios.post(process.env.APP_API+'evento', {
+                            'clase': 'input',
+                            'mensaje': msg.body,
+                            'tipo': 'chat_multimedia',
+                            'bot': req.query.codigo,
+                            'desde': msg.from,
+                            'file': mifile,
+                            'extension': media.mimetype,
+                            'subtipo': mitipo,
+                            'author': miauthor,
+                            'subtype': misubtype,
+                            'whatsapp': msg.timestamp
+                        })
+                    }
+                }else if(msg.location){
+                    const imgBuffer = Buffer.from(msg.body, 'base64');
+                    const r = (Math.random() + 1).toString(36).substring(9);
+                    fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.jpeg', imgBuffer);
+                    var mifile = req.query.nombre+'/'+r+'.jpeg'
+                    await axios.post(process.env.APP_API+'evento', {
+                        'clase': 'input',
+                        'tipo': 'chat_location',
+                        'datos': msg.location,
+                        'bot': req.query.codigo,
+                        'desde': msg.from,
+                        'file': mifile,
+                        'extension': 'image/jpeg',
+                        'subtipo': mitipo,
+                        'whatsapp': msg.timestamp
+                    })
+                }else{
+                    await axios.post(process.env.APP_API+'evento', {
+                        'clase': 'input',
+                        'mensaje': msg.body,
+                        'tipo': mitipo,
+                        'bot': req.query.codigo,
+                        'desde': msg.from,
+                        'author': miauthor,
+                        'subtype': misubtype,
+                        'whatsapp': msg.timestamp
+                    })
+                }
             }
+
+
+            if(msg.fromMe){
+                console.log(msg)
+            }
+        } catch (error) {
+            console.log(error)   
+            await axios.post(process.env.APP_API+'evento', {
+                'clase': 'input',
+                'tipo': 'error',
+                'bot': req.query.codigo,
+                'desde': msg.from,
+                'whatsapp': msg.timestamp,
+                'mensaje': error,
+            })
         }
     });
-
-    // wbot.on('message', async (msg) => {
-    //     const chat = await msg.getChat();
-    //     var mitipo = null
-    //     var miauthor = null
-        // try {
-    //         if (msg.from != "status@broadcast") {                       
-    //             var misubtype = chat.lastMessage ? chat.lastMessage._data.subtype : null 
-    //             if(chat.isGroup) {
-    //                 mitipo = 'chat_group'
-    //                 miauthor = chat.lastMessage ? chat.lastMessage.author : null
-    //             }else{       
-    //                 mitipo = 'chat_private'
-    //                 miauthor = null
-    //             }
-        
-    //             if(msg.hasMedia) {    
-    //                 const media = await msg.downloadMedia(); 
-    //                 if (media) {           
-                            
-    //                     let r = (Math.random() + 1).toString(36).substring(3);
-    //                     let mifile = null   
-                        
-    //                     const imgBuffer = Buffer.from(media.data, 'base64');
-    //                     if (!fs.existsSync('../storage/'+req.query.nombre)){
-    //                         fs.mkdirSync('../storage/'+req.query.nombre);
-    //                     }
-
-    //                     switch (media.mimetype) {
-    //                         case 'image/jpeg':
-    //                             fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.jpeg', imgBuffer);
-    //                             mifile = req.query.nombre+'/'+r+'.jpeg'
-    //                             break;
-    //                         case 'image/webp':
-    //                             fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.webp', imgBuffer);
-    //                             mifile = req.query.nombre+'/'+r+'.webp'
-    //                             break;
-    //                         case 'video/mp4':
-    //                             fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.mp4', imgBuffer);
-    //                             mifile = req.query.nombre+'/'+r+'.mp4'
-    //                             break;
-    //                         case 'audio/ogg; codecs=opus':
-    //                             fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.ogg', imgBuffer);
-    //                             mifile = req.query.nombre+'/'+r+'.ogg'
-    //                             break;
-    //                         case 'audio/mp4':
-    //                             fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.mp4', imgBuffer);
-    //                             mifile = req.query.nombre+'/'+r+'.mp4'
-    //                             break;
-    //                         case 'application/zip':
-    //                             fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.zip', imgBuffer);
-    //                             mifile = req.query.nombre+'/'+r+'.zip'
-    //                             break;
-    //                         case 'application/pdf':
-    //                             fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.pdf', imgBuffer);
-    //                             mifile = req.query.nombre+'/'+r+'.pdf'
-    //                             break;
-    //                         default:
-                                
-    //                             break;
-    //                     }
-                
-    //                     await axios.post(process.env.APP_API+'evento', {
-    //                         'clase': 'input',
-    //                         'mensaje': msg.body,
-    //                         'tipo': 'chat_multimedia',
-    //                         'bot': req.query.codigo,
-    //                         'desde': msg.from,
-    //                         'file': mifile,
-    //                         'extension': media.mimetype,
-    //                         'subtipo': mitipo,
-    //                         'author': miauthor,
-    //                         'subtype': misubtype,
-    //                         'whatsapp': msg.timestamp
-    //                     })
-    //                 }
-    //             }else if(msg.location){
-    //                 const imgBuffer = Buffer.from(msg.body, 'base64');
-    //                 const r = (Math.random() + 1).toString(36).substring(9);
-    //                 fs.writeFileSync('../storage/'+req.query.nombre+'/'+r+'.jpeg', imgBuffer);
-    //                 var mifile = req.query.nombre+'/'+r+'.jpeg'
-    //                 await axios.post(process.env.APP_API+'evento', {
-    //                     'clase': 'input',
-    //                     'tipo': 'chat_location',
-    //                     'datos': msg.location,
-    //                     'bot': req.query.codigo,
-    //                     'desde': msg.from,
-    //                     'file': mifile,
-    //                     'extension': 'image/jpeg',
-    //                     'subtipo': mitipo,
-    //                     'whatsapp': msg.timestamp
-    //                 })
-    //             }else{
-    //                 await axios.post(process.env.APP_API+'evento', {
-    //                     'clase': 'input',
-    //                     'mensaje': msg.body,
-    //                     'tipo': mitipo,
-    //                     'bot': req.query.codigo,
-    //                     'desde': msg.from,
-    //                     'author': miauthor,
-    //                     'subtype': misubtype,
-    //                     'whatsapp': msg.timestamp
-    //                 })
-    //             }
-    //         }
-
-
-            // if(msg.fromMe){
-                // console.log(msg)
-            // }
-        // } catch (error) {
-        //     console.log(error)   
-        //     await axios.post(process.env.APP_API+'evento', {
-        //         'clase': 'input',
-        //         'tipo': 'error',
-        //         'bot': req.query.codigo,
-        //         'desde': msg.from,
-        //         'whatsapp': msg.timestamp,
-        //         'mensaje': error,
-        //     })
-        // }
-    //     res.send(true)
-    // });
 
     wbot.on('message_create', async (msg) => {
      
@@ -471,45 +458,38 @@ app.post('/historial', async (req, res) => {
     res.send(true)
 });
 
-app.post('/send', async (req, res)=>{
-    console.log(req.query)
-
-    var miwbot = sessionstorage.getItem(req.query.slug)
-    var phone = req.query.phone
-    var message = '*Vive la nueva forma de ver la TV*\n'
-    message+= '*con iptvbolivia.com*\n\n'
-    message+= '-> + de 140 Canales en vivo, Altamente estables\n'
-    message+= '-> + de 1400 Películas y series, HD y FHD\n'
-    message+= '-> Eventos Deportivos y Sociales\n'
-    message+= '-> Futbol Nacional e Internacional\n'
-    message+= '-> Soporte Técnico 24/7\n\n'
-    message+= 'más info en: https://chat.whatsapp.com/BmCw3kp5NEYFdTCO7jbRGe'
-    const media = MessageMedia.fromFilePath("../storage/"+req.query.slug+"/0avideo001.mp4")
-    miwbot.sendMessage(phone, media, {caption: message})
-                
-    console.log('mensaje enviado..') 
-    switch (req.query.type) {
-        case "contacto":
-            await axios.post(process.env.APP_API+'contacto/update', {
-                'codigo': req.query.phone,
-                'bot': req.query.bot
-            }) 
-            break;
-        case "grupo":
-            await axios.post(process.env.APP_API+'grupo/update', {
-                'codigo': req.query.phone,
-                'bot': req.query.bot
-            }) 
-            break;
-        default:
-            break;
-    }
-   
-                                                
-    res.send(true)        
-})
 
 let micount = 0
+app.post('/send', async (req, res)=>{
+    console.log(req.body)
+
+    try {
+        var miwbot = sessionstorage.getItem(req.body.slug)
+        var phone = req.body.phone
+        var message = req.body.message
+        miwbot.sendMessage(phone, message).then(() => {
+            console.log("si se envio el chat")
+        }).catch(() => {
+            micount++
+            console.log("no se envio el chat")
+        })       
+
+        if (micount > 2) {
+            micount = 0
+            fs.rmSync('.wwebjs_auth/session-'+req.body.bot, { recursive: true, force: true }); 
+            await axios.post(process.env.APP_API+'estado', {
+                'bot': req.query.bot,
+                'estado': false
+            })
+        }
+
+    } catch (error) {
+        console.log(error)
+    }             
+    res.send(true)       
+})
+
+
 app.post('/template', async (req, res)=>{
     console.log(req.body)
 
@@ -529,6 +509,7 @@ app.post('/template', async (req, res)=>{
                         console.log("size: "+stats.size)
                     }).catch(() => {
                         misend = false
+                        micount++
                         console.log("no se envio el chat")
                     })
                 }else{
@@ -537,10 +518,10 @@ app.post('/template', async (req, res)=>{
                         console.log("si se envio el chat")
                     }).catch(() => {
                         misend = false
+                        micount++
                         console.log("no se envio el chat")
                     })
                 }
-                console.log("mensaje enviado ...") 
             }
 
             //contactos
@@ -552,6 +533,7 @@ app.post('/template', async (req, res)=>{
                         console.log("size: "+stats.size)
                     }).catch(() => {
                         misend = false
+                        micount++
                         console.log("no se envio el chat")
                     })
                 }else{
@@ -560,10 +542,10 @@ app.post('/template', async (req, res)=>{
                         console.log("si se envio el chat")
                     }).catch(() => {
                         misend = false
+                        micount++
                         console.log("no se envio el chat")
                     })
                 }
-                console.log("mensaje enviado ...") 
             }
 
             
@@ -622,7 +604,7 @@ app.post('/download', async (req, res) => {
                 }).catch(() => {
                     micount++
                     misend = false
-                    console.log("no se envio el chat"+error)
+                    console.log("no se envio el chat")
                 })
     
             }
@@ -635,7 +617,7 @@ app.post('/download', async (req, res) => {
                     console.log("size: "+stats.size)
                 }).catch((error) => {
                     misend = false
-                    console.log("no se envio el chat "+error)
+                    console.log("no se envio el chat")
                 })
             }
 
