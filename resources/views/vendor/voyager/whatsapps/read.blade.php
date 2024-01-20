@@ -2,7 +2,7 @@
 
 @php
     $miwhats = App\Whatsapp::find($dataTypeContent->getKey());
-    $micontactos = App\Contacto::where("bot", $miwhats->codigo)->get();
+    $micontactos = App\Contacto::where("user_id", Auth::user()->id)->get();
     $migrupos = App\Grupo::where("bot", $miwhats->codigo)->get();
     $mieventos = App\Evento::where("bot", $miwhats->codigo)->get();
     $sendcontacto = App\Contacto::where("bot", $miwhats->codigo)->where("send", false)->get();
@@ -60,13 +60,13 @@
                                             <br>
                                             Telefono: {{ $miwhats->telefono }}            
                                             <br>
-                                            T. Envios: N° {{ count($mieventos) }}
+                                            T. Chats: N° {{ count($mieventos) }}
                                             <br>
                                             Slug:  {{ $miwhats->slug }}
                                             <br>
                                             Default:  {{ $miwhats->default ? 'SI' : 'NO' }}
                                             <br>
-                                            {{ $miwhats->created_at }}
+                                            {{ $miwhats->updated_at }}
                                         </code>
                                         @if(!$miwhats->estado)
                                             <a href="#" id="miactivar" class="btn btn-danger btn-block" onclick="activar()" >ACTIVAR EL BOT</a>
@@ -90,7 +90,7 @@
                                             <br>
                                             T. Contactos: N° {{ count($micontactos) }}
                                         </code>                                        
-                                        <a href="#" class="btn btn-dark btn-block" onclick="micontactos()" >Act. Contactos</a>
+                                        <a href="#" class="btn btn-dark btn-block" id="mibtn" onclick="micontactos()" >Act. Contactos</a>
                                         <a href="#" class="btn btn-dark btn-block" onclick="migrupos()" >Act. Grupos</a>
                                         
                                         <!-- <hr>
@@ -109,24 +109,6 @@
         </section>            
     </main>
 
-    <!-- Modal -->
-    <div class="modal fade modal-primary" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-        </div>
-        <div class="modal-body">
-            ...
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" onclick="migrupos()">Save changes</button>
-        </div>
-        </div>
-    </div>
-    </div>
 
 @stop
 
@@ -142,18 +124,15 @@
             listar(miwhats.data)
         });
 
-         
-        // console.log("{{ $miwhats->default }}")
+        
         window.Echo.channel('messages')
             .listen('MiEvent', async (e) => {  
-                console.log(e.message)
                 var miwhats = e.message
-               
-                if (miwhats.bot == "{{ $miwhats->codigo }}" && "{{ $miwhats->default }}") {
+                console.log(e.message)
+                if ( ("{{ $miwhats->default }}" == 1) && (miwhats.user_id == "{{ Auth::user()->id }}") ) {
                     var milink = "{{ asset('storage') }}" 
                     milink = milink+"/"+miwhats.file
                     $("#misocket").prepend("<hr style='border-top: 1px solid #2D353E;'>")
-                    // console.log(e.message)
                     if (miwhats.mensaje) {
                         var messages = miwhats.mensaje
                         // for(var i=0; i< messages.length; i++) {
@@ -243,7 +222,7 @@
                         default:
                             break;
                     }                                  
-               }
+                }
             }
         )
         
@@ -299,11 +278,17 @@
         }
 
         async function micontactos(){
+            $("#mibtn").hide()
             await axios.post("{{ env('APP_BOT') }}/contactos?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}&user_id={{ Auth::user()->id }}")
+            // location.reload()
+            
+          
         }
 
         async function migrupos(){
             await axios.post("{{ env('APP_BOT') }}/historial?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}&user_id={{ Auth::user()->id }}")
+            // $("#miactivar").hide()
+            location.reload()
         }
 
         async function miestados(){

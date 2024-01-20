@@ -231,9 +231,9 @@
             // event.preventDefault()
 
             if (midefault.checked) {
-                console.log(midefault.checked)
-                await axios.post("/api/whatsapp/default")
-
+                @php
+                    App\Whatsapp::where('default', true)->where('user_id', Auth::user()->id)->update(['default' => false]);
+                @endphp
             }
         });
     </script>

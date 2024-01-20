@@ -3,8 +3,8 @@
     $add  = is_null($dataTypeContent->getKey());
     $miuser = Auth::user(); 
     $miwhats = App\Whatsapp::where("user_id", $miuser->id)->where("default" , true)->first();
-    $contactos = App\Contacto::where("bot", $miwhats->codigo)->get();
-    $grupos = App\Grupo::where("bot", $miwhats->codigo)->get();
+    $contactos = App\Contacto::where("user_id", $miuser->id)->get();
+    $grupos = App\Grupo::where("bot", $miwhats->codigo)->where("user_id", $miuser->id)->get();
 @endphp
 
 @extends('voyager::master')
@@ -258,6 +258,7 @@
                 grupos: Array.from(migrupos.selectedOptions).map(({ value }) => value),
                 contactos: Array.from(micontactos.selectedOptions).map(({ value }) => value),
                 bot: "{{ $miwhats->slug }}",
+                codigo: "{{ $miwhats->codigo }}",
                 message: myInput3.value
             })
         });

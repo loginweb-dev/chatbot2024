@@ -10,7 +10,7 @@
         $contactos = App\Contacto::all();
         $grupos = App\Grupo::all();
     }else{
-        $contactos = App\Contacto::where("bot", $miwhats->codigo)->get();
+        $contactos = App\Contacto::where("user_id", $miuser->id)->get();
         $grupos = App\Grupo::where("bot", $miwhats->codigo)->get();
     }
     if($edit){
@@ -259,6 +259,7 @@
                     grupos: Array.from(migrupos.selectedOptions).map(({ value }) => value),
                     contactos: Array.from(micontactos.selectedOptions).map(({ value }) => value),
                     bot: "{{ $miwhats->slug }}",
+                    codigo: "{{ $miwhats->codigo }}",
                     message: mimensaje.value,
                     multimedia: "{{ $mimulti }}",
                     id: "{{ $mitamplate->id }}"

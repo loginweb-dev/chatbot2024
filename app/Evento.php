@@ -10,7 +10,7 @@ use App\Whatsapp;
 
 class Evento extends Model
 {
-    protected $fillable = ['datos', 'tipo', 'mensaje', 'bot', 'desde', 'file', 'extension', 'subtipo', 'author', 'subtype', 'clase', 'whatsapp'];
+    protected $fillable = ['datos', 'tipo', 'mensaje', 'bot', 'desde', 'file', 'extension', 'subtipo', 'author', 'subtype', 'clase', 'whatsapp', 'user_id'];
 
     
 	protected $appends=['published', 'fserver', 'fwhats'];

@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use TCG\Voyager\Facades\Voyager;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use TCG\Voyager\Events\BreadDataAdded;
 
 class VoyagerWhatsappController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
 {

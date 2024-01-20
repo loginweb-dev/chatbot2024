@@ -19,8 +19,8 @@ Route::get('/', function () {
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
-    Route::get('/clear', function () {
 
+    Route::get('/clear', function () {
         App\Evento::truncate();
         App\Contacto::truncate();
         App\Grupo::truncate();       
@@ -38,6 +38,9 @@ Route::group(['prefix' => 'admin'], function () {
             Storage::disk('public')->deleteDirectory($value->name);
         }   
 
-        return redirect('/admin');
+        App\Subscription::truncate(); 
+        App\Product::truncate();  
+        Storage::disk('public')->deleteDirectory('plantillas');
+        return redirect('/admin/whatsapps');
     });
 });

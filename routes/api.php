@@ -34,7 +34,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/socket/contactos', function (Request $request) {
 	// return $request->avatar;
 	try {		
-		$mifind = Contacto::where('number', $request->number)->where('bot', $request->bot)->first();
+		$mifind = Contacto::where('number', $request->number)->where('user_id', $request->user_id)->first();
 		if ($mifind) {
 			Storage::disk('public')->delete($mifind->avatar);
 			$mifind->name = $request->midata["name"];
@@ -55,13 +55,17 @@ Route::post('/socket/contactos', function (Request $request) {
 			$mifind->codigo = $request->midata["id"]["_serialized"];
 			$mifind->save();
 		}
-		event(new MiEvent([
-			'mensaje'=> "Se agrego o actualizo el contacto ".$request->midata["name"]. ", con el codigo  ".$request->number,
-			'bot' => $request->bot,
-			'tipo' => $request->tipo,
-			'file' => $request->avatar ? $request->avatar : null,
-			'fwhats' => date('Y-m-d H:i:s')
-		]));
+
+		// $mibot = Whatsapp::where('codigo', $request->bot)->first();
+		// if ($mibot->default == 1) {
+		// 	event(new MiEvent([
+		// 		'mensaje'=> "Se agrego o actualizo el contacto ".$request->midata["name"]. ", con el codigo  ".$request->number,
+		// 		'bot' => $request->bot,
+		// 		'tipo' => $request->tipo,
+		// 		'file' => $request->avatar ? $request->avatar : null,
+		// 		'fwhats' => date('Y-m-d H:i:s')
+		// 	]));
+		// }
 		return $mifind;
     } catch (Exception $e) {
 		event(new MiEvent([
@@ -81,7 +85,7 @@ Route::post('/socket/contacto/update', function (Request $request) {
 
 Route::post('/socket/grupos', function (Request $request) {
 	try {		
-		$mifind = Grupo::where('bot', $request->bot)->where('codigo', $request->codigo)->first();
+		$mifind = Grupo::where('codigo', $request->codigo)->where('user_id', $request->user_id)->first();
 		if ($mifind) {
 			$mifind->name = $request->name;
 			$mifind->_id = json_encode($request->_id);
@@ -92,6 +96,7 @@ Route::post('/socket/grupos', function (Request $request) {
 			$mifind->owner = json_encode($request->owner);
 			$mifind->send = false;
 			$mifind->user_id = $request->user_id;
+			$mifind->bot = $request->bot;
 			$mifind->save();
 		}else{
 			$mifind = Grupo::create([
@@ -110,12 +115,15 @@ Route::post('/socket/grupos', function (Request $request) {
 				'user_id' => $request->user_id
 			]);
 		}
-		event(new MiEvent([
-			'mensaje'=> "Se agrego o actualizo el grupo ".$request->name.", con el codigo  ".$request->codigo,
-			'bot' => $request->bot,
-			'fwhats' => date('Y-m-d H:i:s'),
-			'tipo' => $request->tipo
-		]));
+
+
+		// event(new MiEvent([
+		// 	'mensaje'=> "Se agrego o actualizo el grupo ".$request->name.", con el codigo  ".$request->codigo,
+		// 	'bot' => $request->bot,
+		// 	'fwhats' => date('Y-m-d H:i:s'),
+		// 	'tipo' => $request->tipo
+		// ]));
+
 		return response()->json([
 			'message' => 'Grupo ingresado: '.$request->name
 		]);;
@@ -139,6 +147,7 @@ Route::post('/socket/grupo/update', function (Request $request) {
 });
 
 Route::post('/socket/evento', function (Request $request) {	
+	$mibot = Whatsapp::where('codigo', $request->bot)->first();
 	try {
 		if (($request->tipo != 'qr') && ($request->tipo != 'ready') && ($request->tipo != 'authenticated') && ($request->tipo != 'init') && ($request->tipo != 'status') && ($request->tipo != 'destroy')) {
 			$mienveto = Evento::create([
@@ -153,27 +162,35 @@ Route::post('/socket/evento', function (Request $request) {
 				'subtipo' => $request->subtipo,
 				'author' => $request->author,
 				'subtype' => $request->subtype,
-				'whatsapp'=> $request->whatsapp
+				'whatsapp'=> $request->whatsapp,
+				'user_id'=> $mibot->user_id
 			]);		
-			$mievent =  Evento::where('id', $mienveto->id)->with('contacto', 'grupo', 'miauthor', 'miwhats')->first();
 
-			event(new MiEvent($mievent));
+
+			if ($mibot->default) {
+				$midata = Evento::where('id', $mienveto->id)->with('grupo', 'contacto', 'miauthor', 'miwhats')->first();
+				event(new MiEvent($midata));
+			}
+						
 		}else{
-			event(new MiEvent([
-				'clase' => $request->clase,
-				'bot' => $request->bot,
-				'desde' => $request->desde,
-				'mensaje' => $request->mensaje,
-				'fwhats' => date('Y-m-d H:i:s'),
-				'tipo' => $request->tipo,
-				'file' => $request->file,
-				'extension' => $request->extension,
-				'subtipo' => $request->subtipo,
-				'author' => $request->author,
-				'subtype' => $request->subtype,
-				'datos' => json_encode($request->datos),
-				'whatsapp'=> $request->whatsapp
-			]));		
+			if ($mibot->default) {
+				event(new MiEvent([
+					'clase' => $request->clase,
+					'bot' => $request->bot,
+					'desde' => $request->desde,
+					'mensaje' => $request->mensaje,
+					'fwhats' => date('Y-m-d H:i:s'),
+					'tipo' => $request->tipo,
+					'file' => $request->file,
+					'extension' => $request->extension,
+					'subtipo' => $request->subtipo,
+					'author' => $request->author,
+					'subtype' => $request->subtype,
+					'datos' => json_encode($request->datos),
+					'whatsapp'=> $request->whatsapp,
+					'user_id'=> $mibot->user_id
+				]));	
+			}	
 		}
 		
 		return true;
@@ -200,6 +217,7 @@ Route::post('/socket/qr', function (Request $request) {
 
 Route::post('/socket/estado', function (Request $request) {
 	// event(new MiEvent($request->all()));
+
 	$miwhats = Whatsapp::where('codigo', $request->bot)->first();
 	if ($miwhats) {
 		$miwhats->estado = $request->estado;
@@ -284,10 +302,6 @@ Route::post('/whatsapp/grupo2', function (Request $request) {
 		->get();
 });
 
-Route::post('/whatsapp/default', function () {
-	Whatsapp::where('default', true)->update(['default' => false]);
-	return true;
-});
 
 Route::post('/ai/mistral', function (Request $request) {
 	$data1 = [

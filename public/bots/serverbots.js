@@ -76,6 +76,25 @@ app.post('/init', async (req, res) => {
         // console.log('-----------------authenticated-----------------')
     });
     
+    wbot.on('auth_failure', async msg => {
+        // Fired if session restore was unsuccessful
+        console.error('AUTHENTICATION FAILURE', msg);
+        // var miwbot = sessionstorage.getItem(req.query.nombre)
+        wbot.destroy()
+        sessionstorage.removeItem(req.query.nombre)
+        await axios.post(process.env.APP_API+'estado', {
+            'bot': req.query.codigo,
+            'estado': false
+        })
+        await axios.post(process.env.APP_API+'evento', {
+            'clase': 'input',
+            'tipo': 'destroy',
+            'bot': req.query.codigo,
+            'mensaje': 'El bot '+req.query.nombre+', fue eliminado'
+        })
+        fs.rmSync('.wwebjs_auth/session-'+req.query.nombre, { recursive: true, force: true }); 
+    });
+
     wbot.on('ready', async () => {
         // console.log('-----------------ready-----------------')
         console.log('ready');
@@ -423,7 +442,6 @@ app.post('/contactos', async (req, res) => {
     res.send(true)
 });
 
-
 app.post('/historial', async (req, res) => {
     console.log(req.query)    
     try {    
@@ -556,11 +574,13 @@ app.post('/template', async (req, res)=>{
                 'size': stats.size
             })
  
-            if (micount > 2) {
+            if (micount >= 2) {
+                console.log("eliminado .."+micount)
                 micount = 0
+                miwbot.destroy()
                 fs.rmSync('.wwebjs_auth/session-'+req.body.bot, { recursive: true, force: true }); 
                 await axios.post(process.env.APP_API+'estado', {
-                    'bot': req.query.bot,
+                    'bot': req.body.codigo,
                     'estado': false
                 })
             }
@@ -630,9 +650,16 @@ app.post('/download', async (req, res) => {
                 'size': stats.size
             })
 
-            if (micount > 3) {
+            if (micount >= 2) {
+                console.log("eliminado .."+micount)
                 micount = 0
-                fs.removeSync('.wwebjs_auth/session-'+req.body.name); 
+                miwbot.destroy()
+                fs.rmSync('.wwebjs_auth/session-'+req.body.bot, { recursive: true, force: true }); 
+                await axios.post(process.env.APP_API+'estado', {
+                    'bot': req.body.codigo,
+                    'estado': false
+                })
+                
             }
       
         }
