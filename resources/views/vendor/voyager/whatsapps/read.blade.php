@@ -78,8 +78,8 @@
                                         <hr>
                                         <h4 class="text-center">CONSULTAS</h4>
 
-                                        <a href="#" class="btn btn-dark btn-block" onclick="michats()" >T. los Chats</a>
-                                         <a href="#" class="btn btn-dark btn-block" onclick="miestados()" >T. los Estados</a>
+                                        <a href="#" class="btn btn-dark btn-block" onclick="michats()" >Tal. los Chats</a>
+                                         <a href="#" class="btn btn-dark btn-block" onclick="miestados()" >Tal. los Estados</a>
                                         <!--<a href="#" class="btn btn-dark btn-block" onclick="migrupo()" >Chats de Grupos</a>
                                         <a href="#" class="btn btn-dark btn-block" onclick="migrupo2()" >Multimedia de Grupos</a> -->
 
@@ -90,8 +90,8 @@
                                             <br>
                                             T. Contactos: N° {{ count($micontactos) }}
                                         </code>                                        
-                                        <a href="#" class="btn btn-dark btn-block" onclick="micontactos()" >Contactos</a>
-                                        <a href="#" class="btn btn-dark btn-block" onclick="migrupos()" >Grupos</a>
+                                        <a href="#" class="btn btn-dark btn-block" onclick="micontactos()" >Act. Contactos</a>
+                                        <a href="#" class="btn btn-dark btn-block" onclick="migrupos()" >Act. Grupos</a>
                                         
                                         <!-- <hr>
                                         <h4 class="text-center">Envios Masivos</h4>
@@ -143,12 +143,13 @@
         });
 
          
-
+        // console.log("{{ $miwhats->default }}")
         window.Echo.channel('messages')
             .listen('MiEvent', async (e) => {  
-                // console.log(e.message)
+                console.log(e.message)
                 var miwhats = e.message
-                if (miwhats.bot == "{{ $miwhats->codigo }}") {
+               
+                if (miwhats.bot == "{{ $miwhats->codigo }}" && "{{ $miwhats->default }}") {
                     var milink = "{{ asset('storage') }}" 
                     milink = milink+"/"+miwhats.file
                     $("#misocket").prepend("<hr style='border-top: 1px solid #2D353E;'>")
@@ -418,7 +419,7 @@
                 $("#misocket").append("<hr style='border-top: 1px solid #2D353E;'>")
             }
             $("#misocket").prepend("<hr style='border-top: 1px solid #2D353E;'>")
-            $("#misocket").prepend("<div class='chat-message-group'><div class='chat-message'>Mostrando los ultimos "+miwhats.length+" registros del dia de hoy</div></div>") 
+            $("#misocket").prepend("<div class='chat-message-group'><div class='chat-message'>Mostrando los ultimos "+miwhats.length+" registros</div></div>") 
 
         }
                                                                    

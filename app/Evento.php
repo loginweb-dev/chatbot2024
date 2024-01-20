@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use App\Cliente;
 use App\Grupo;
+use App\Whatsapp;
 
 class Evento extends Model
 {
@@ -38,5 +39,9 @@ class Evento extends Model
 	public function miauthor()
     {
         return $this->belongsTo(Contacto::class, 'author', 'codigo');
+    }
+	public function miwhats()
+    {
+        return $this->belongsTo(Whatsapp::class, 'bot', 'codigo');
     }
 }

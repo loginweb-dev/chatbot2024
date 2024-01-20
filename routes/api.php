@@ -155,7 +155,8 @@ Route::post('/socket/evento', function (Request $request) {
 				'subtype' => $request->subtype,
 				'whatsapp'=> $request->whatsapp
 			]);		
-			$mievent =  Evento::where('id', $mienveto->id)->with('contacto', 'grupo', 'miauthor')->first();
+			$mievent =  Evento::where('id', $mienveto->id)->with('contacto', 'grupo', 'miauthor', 'miwhats')->first();
+
 			event(new MiEvent($mievent));
 		}else{
 			event(new MiEvent([
