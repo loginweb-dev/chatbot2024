@@ -2,6 +2,7 @@
     $edit = !is_null($dataTypeContent->getKey());
     $add  = is_null($dataTypeContent->getKey());
     $miuser = Auth::user()->id; 
+    $miwhats = App\Whatsapp::where("user_id", Auth::user()->id)->where("default" , true)->first();
 @endphp
 
 @extends('voyager::master')
@@ -12,13 +13,15 @@
 
 @section('page_title', __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->getTranslatedAttribute('display_name_singular'))
 
-@section('page_header')
-    <h1 class="page-title">
-        <i class="{{ $dataType->icon }}"></i>
-        {{ __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->getTranslatedAttribute('display_name_singular') }}
-    </h1>
-    @include('voyager::multilingual.language-selector')
-@stop
+@if($miwhats)
+    @section('page_header')
+        <h1 class="page-title">
+            <i class="{{ $dataType->icon }}"></i>
+            {{ __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->getTranslatedAttribute('display_name_singular') }} | BOT: {{ $miwhats->nombre }} | TEL: {{ $miwhats->telefono }}
+        </h1>
+        @include('voyager::multilingual.language-selector')
+    @stop
+@endif
 
 @section('content')
     <div class="page-content edit-add container-fluid">
@@ -30,7 +33,7 @@
                     <form role="form"
                             class="form-edit-add"
                             action="{{ $edit ? route('voyager.'.$dataType->slug.'.update', $dataTypeContent->getKey()) : route('voyager.'.$dataType->slug.'.store') }}"
-                            method="POST" enctype="multipart/form-data">
+                            method="POST" enctype="multipart/form-data" id="miform">
                         <!-- PUT Method if we are editing -->
                         @if($edit)
                             {{ method_field("PUT") }}
@@ -211,26 +214,27 @@
             $('[data-toggle="tooltip"]').tooltip();
         });
 
-        // var inputs = $('#myuser :input');
-        // var inputs = document.getElementById('myuser').getElementsByTagName('input');
-        // inputs.setAttribute('value', 90)
-        // console.log(inputs)
 
-        let myInput = document.querySelector('input[name="user_id"]');
         let myInput2 = document.querySelector('input[name="telefono"]');
         let myInput3 = document.querySelector('input[name="codigo"]');
         let myInput4 = document.querySelector('input[name="slug"]');
-        // let myInput5 = document.querySelector('input[name="estado"]');
-        // $("#mylogo").append("<a href='#' class='btn btn-xs btn-dark btn-block'> Galeria Multemedia </a>");
-        myInput.readOnly = true
         myInput3.readOnly = true
         myInput4.readOnly = true
-        // myInput5.disabled = true
-        @if($add)
-            myInput.value = "{{ $miuser }}"        
+        @if($add)      
             myInput2.addEventListener('keyup', () => {
                 myInput3.value = '591'+myInput2.value+'@c.us'
             })
         @endif
+
+        let midefault = document.querySelector('input[name="default"]');
+        $( "#miform" ).on( "submit", async function( event ) {
+            // event.preventDefault()
+
+            if (midefault.checked) {
+                console.log(midefault.checked)
+                await axios.post("/api/whatsapp/default")
+
+            }
+        });
     </script>
 @stop

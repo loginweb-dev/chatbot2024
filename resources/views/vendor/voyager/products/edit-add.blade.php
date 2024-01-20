@@ -236,8 +236,8 @@
 
             $("#mycredit").append("<a href='#' onclick='micompra()' class='btn btn-dark btn-block'><<< Comprar >>></a>");
 
-            var midesc = document.querySelector('textarea[name="description"]')
-            midesc.readOnly = true
+            // var midesc = document.querySelector('textarea[name="description"]')
+            // midesc.readOnly = true
 
             function micompra() {
                 location.href = "/admin/products"
@@ -249,15 +249,7 @@
             $( "#miform" ).on( "submit", async function( event ) {
                 // event.preventDefault()
 
-                var midata = {
-                    grupos: Array.from(migrupos.selectedOptions).map(({ value }) => value),
-                    contactos: Array.from(micontactos.selectedOptions).map(({ value }) => value),
-                    bot: "{{ $miwhats->slug }}",
-                    message: mimensaje.value,
-                    multimedia: "{{ $mimulti }}",
-                    id: "{{ $mitamplate->id }}"
-                }
-                await axios.post("{{ env('APP_BOT') }}/template", midata)
+             
             });
 
         @endif

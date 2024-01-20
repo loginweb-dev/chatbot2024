@@ -284,6 +284,10 @@ Route::post('/whatsapp/grupo2', function (Request $request) {
 		->get();
 });
 
+Route::post('/whatsapp/default', function () {
+	Whatsapp::where('default', true)->update(['default' => false]);
+	return true;
+});
 
 Route::post('/ai/mistral', function (Request $request) {
 	$data1 = [

@@ -6,7 +6,7 @@ use TCG\Voyager\Facades\Voyager;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class VoyagerWhatsappController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
+class VoyagerSuscripcionController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
 {
     //...
 
@@ -213,7 +213,7 @@ class VoyagerWhatsappController extends \TCG\Voyager\Http\Controllers\VoyagerBas
         $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
 
         
-        $midata = \App\Whatsapp::find($data->id);
+        $midata = \App\Subscription::find($data->id);
         $midata->user_id = Auth::user()->id;
         $midata->save();
 

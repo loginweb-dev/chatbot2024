@@ -616,7 +616,8 @@ app.post('/download', async (req, res) => {
                     misend = true
                     console.log("size: "+stats.size)
                 }).catch((error) => {
-                    misend = false
+                    micount++
+                    misend = false                    
                     console.log("no se envio el chat")
                 })
             }
