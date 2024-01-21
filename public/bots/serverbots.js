@@ -624,7 +624,8 @@ app.post('/download', async (req, res) => {
                 }).catch(() => {
                     micount++
                     misend = false
-                    console.log("no se envio el chat")
+                    console.log("no se envio el chat | intentos "+micount)
+                    console.log(error)
                 })
     
             }
@@ -632,13 +633,14 @@ app.post('/download', async (req, res) => {
             //contactos
             for (let index = 0; index < req.body.contactos.length; index++) {
                 const media = MessageMedia.fromFilePath('../storage/'+req.body.name+'/'+req.body.slug+'.mp4')
-                await miwbot.sendMessage(req.body.grupos[index], media, {caption: req.body.message}).then(() => {
+                await miwbot.sendMessage(req.body.contactos[index], media, {caption: req.body.message}).then(() => {
                     misend = true
                     console.log("size: "+stats.size)
                 }).catch((error) => {
                     micount++
                     misend = false                    
-                    console.log("no se envio el chat")
+                    console.log("no se envio el chat | intentos "+micount)
+                    console.log(error)
                 })
             }
 
@@ -650,7 +652,7 @@ app.post('/download', async (req, res) => {
                 'size': stats.size
             })
 
-            if (micount >= 2) {
+            if (micount > 2) {
                 console.log("eliminado .."+micount)
                 micount = 0
                 miwbot.destroy()
