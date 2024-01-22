@@ -59,7 +59,7 @@ app.post('/init', async (req, res) => {
             'bot': req.query.codigo,
             'file': 'qr/'+r+'.png'
         })
-        sessionstorage.setItem(req.query.nombre, wbot)
+        // sessionstorage.setItem(req.query.nombre, wbot)
     });
 
     wbot.on("authenticated", async session => {
@@ -96,7 +96,7 @@ app.post('/init', async (req, res) => {
     });
 
     wbot.on('ready', async () => {
-        // console.log('-----------------ready-----------------')
+        console.log('-----------------ready-----------------')
         console.log('ready');
         try {
             await axios.post(process.env.APP_API+'evento', {

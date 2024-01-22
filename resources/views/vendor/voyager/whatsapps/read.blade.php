@@ -114,8 +114,6 @@
 
 @section('javascript')
     <script src="{{ asset('js/app.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
-
     <script>
         $(document).ready(async function () { 
             var miwhats = await axios.post("/api/whatsapp/listar", {
@@ -267,8 +265,8 @@
         }
 
         async function activar(){
-            await axios.post("{{ env('APP_BOT') }}/init?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}") 
             $("#miactivar").hide()
+            await axios.post("{{ env('APP_BOT') }}/init?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}")            
         }
 
         async function stop(){

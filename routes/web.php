@@ -21,26 +21,26 @@ Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
 
     Route::get('/clear', function () {
-        App\Evento::truncate();
-        App\Contacto::truncate();
-        App\Grupo::truncate();       
-        $miwhats = App\Whatsapp::all();
-        foreach ($miwhats as $value) {
-            Storage::disk('public')->deleteDirectory($value->slug);
-        }        
-        Storage::disk('public')->deleteDirectory('qr');
+        // App\Evento::truncate();
+        // App\Contacto::truncate();
+        // App\Grupo::truncate();       
+        // $miwhats = App\Whatsapp::all();
+        // foreach ($miwhats as $value) {
+        //     Storage::disk('public')->deleteDirectory($value->slug);
+        // }        
+        // Storage::disk('public')->deleteDirectory('qr');
 
-        App\Whatsapp::truncate();
-        App\Descarga::truncate();
-        App\Plantilla::truncate();
-        $miuser = App\Models\User::all();
-        foreach ($miuser as $value) {
-            Storage::disk('public')->deleteDirectory($value->name);
-        }   
+        // App\Whatsapp::truncate();
+        // App\Descarga::truncate();
+        // App\Plantilla::truncate();
+        // $miuser = App\Models\User::all();
+        // foreach ($miuser as $value) {
+        //     Storage::disk('public')->deleteDirectory($value->name);
+        // }   
 
-        App\Subscription::truncate(); 
-        App\Product::truncate();  
-        Storage::disk('public')->deleteDirectory('plantillas');
+        // App\Subscription::truncate(); 
+        // App\Product::truncate();  
+        // Storage::disk('public')->deleteDirectory('plantillas');
         return redirect('/admin/whatsapps');
     });
 });
