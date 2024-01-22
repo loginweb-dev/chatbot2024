@@ -344,6 +344,32 @@ app.post('/init', async (req, res) => {
         }
     });
 
+    wbot.on('group_join', async (notification) => {
+        // User has joined or been added to the group.
+        console.log('join', notification);
+        notification.reply('User joined.');
+        await axios.post(process.env.APP_API+'evento', {
+            'clase': 'input',
+            'tipo': 'join',
+            'bot': req.query.codigo,
+            'mensaje': 'Alguien se agrego a un grupo',
+            'datos': notification
+        })
+    });
+    
+    wbot.on('group_leave', async (notification) => {
+        // User has left or been kicked from the group.
+        console.log('leave', notification);
+        notification.reply('User left.');
+        await axios.post(process.env.APP_API+'evento', {
+            'clase': 'input',
+            'tipo': 'leave',
+            'bot': req.query.codigo,
+            'mensaje': 'Alguien se salio a un grupo',
+            'datos': notification
+        })
+    });
+
     await axios.post(process.env.APP_API+'evento', {
         'clase': 'input',
         'tipo': 'init',

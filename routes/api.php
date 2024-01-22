@@ -262,7 +262,7 @@ Route::post('/whatsapp/listar', function (Request $request) {
 	// ->where('created_at', '>=', date('Y-m-d'))
 	->orderBy('created_at', 'desc')
 	->with('contacto', 'grupo', 'miauthor')
-	->take(100)
+	->take(50)
 	->get();
 });
 

@@ -122,6 +122,56 @@
             listar(miwhats.data)
         });
 
+                
+        function sleep(ms) {
+            return new Promise(
+                resolve => setTimeout(resolve, ms)
+            );
+        }
+
+        async function misend(type){
+            
+            switch (type) {
+                case "contacto":
+                    @foreach($sendcontacto as $item)                        
+                        var segundos = Math.floor(Math.random() * 60) + 60;
+                        console.log("{{ $item->codigo }}")
+                        console.log("{{ $miwhats->codigo }}")
+                        console.log(segundos)
+                        await axios.post("{{ env('APP_BOT') }}/send?phone={{ $item->codigo }}&slug={{ $miwhats->slug }}&bot={{ $miwhats->codigo }}&type="+type) 
+                        console.log("{{ $item->codigo }}")
+                        await sleep(segundos * 1000)
+                    @endforeach
+                    break;
+                case "grupo":
+                    // console.log("{{ $sendgrupo }}")
+                    @foreach($sendgrupo as $item)                        
+                        var segundos = Math.floor(Math.random() * 60) + 60;
+                        console.log("{{ $item->codigo }}")
+                        console.log("{{ $miwhats->codigo }}")
+                        console.log(segundos)
+                        await axios.post("{{ env('APP_BOT') }}/send?phone={{ $item->codigo }}&slug={{ $miwhats->slug }}&bot={{ $miwhats->codigo }}&type="+type) 
+                        console.log("{{ $item->codigo }}")
+                        await sleep(segundos * 1000)
+                    @endforeach
+                    break;
+                default:
+                    break;
+            }
+
+
+        }
+
+        async function activar(){
+            $("#miactivar").hide()
+            await axios.post("{{ env('APP_BOT') }}/init?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}")         
+            @php
+                App\Whatsapp::where('default', true)->where('user_id', Auth::user()->id)->update(['default' => false]);
+                $miwhats->default = true;
+                $miwhats->save();
+                $miwhats = App\Whatsapp::find($dataTypeContent->getKey());
+            @endphp   
+        }
         
         window.Echo.channel('messages')
             .listen('MiEvent', async (e) => {  
@@ -224,51 +274,6 @@
             }
         )
         
-        
-        function sleep(ms) {
-            return new Promise(
-                resolve => setTimeout(resolve, ms)
-            );
-        }
-
-        async function misend(type){
-            
-            switch (type) {
-                case "contacto":
-                    @foreach($sendcontacto as $item)                        
-                        var segundos = Math.floor(Math.random() * 60) + 60;
-                        console.log("{{ $item->codigo }}")
-                        console.log("{{ $miwhats->codigo }}")
-                        console.log(segundos)
-                        await axios.post("{{ env('APP_BOT') }}/send?phone={{ $item->codigo }}&slug={{ $miwhats->slug }}&bot={{ $miwhats->codigo }}&type="+type) 
-                        console.log("{{ $item->codigo }}")
-                        await sleep(segundos * 1000)
-                    @endforeach
-                    break;
-                case "grupo":
-                    // console.log("{{ $sendgrupo }}")
-                    @foreach($sendgrupo as $item)                        
-                        var segundos = Math.floor(Math.random() * 60) + 60;
-                        console.log("{{ $item->codigo }}")
-                        console.log("{{ $miwhats->codigo }}")
-                        console.log(segundos)
-                        await axios.post("{{ env('APP_BOT') }}/send?phone={{ $item->codigo }}&slug={{ $miwhats->slug }}&bot={{ $miwhats->codigo }}&type="+type) 
-                        console.log("{{ $item->codigo }}")
-                        await sleep(segundos * 1000)
-                    @endforeach
-                    break;
-                default:
-                    break;
-            }
-
-
-        }
-
-        async function activar(){
-            $("#miactivar").hide()
-            await axios.post("{{ env('APP_BOT') }}/init?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}")            
-        }
-
         async function stop(){
             var mirest = await axios.post("{{ env('APP_BOT') }}/stop?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}") 
             // $("#miactivar").hide()
@@ -285,7 +290,6 @@
 
         async function migrupos(){
             await axios.post("{{ env('APP_BOT') }}/historial?nombre={{ $miwhats->slug }}&codigo={{ $miwhats->codigo }}&user_id={{ Auth::user()->id }}")
-            // $("#miactivar").hide()
             location.reload()
         }
 

@@ -3,6 +3,7 @@
     $add  = is_null($dataTypeContent->getKey());
     $miuser = Auth::user()->id; 
     $miwhats = App\Whatsapp::where("user_id", Auth::user()->id)->where("default" , true)->first();
+    $miwhats2 = App\Whatsapp::find($dataTypeContent->getKey());
 @endphp
 
 @extends('voyager::master')
@@ -234,6 +235,7 @@
                 @php
                     App\Whatsapp::where('default', true)->where('user_id', Auth::user()->id)->update(['default' => false]);
                 @endphp
+                await axios.post("{{ env('APP_BOT') }}/historial?nombre={{ $miwhats2->slug }}&codigo={{ $miwhats2->codigo }}&user_id={{ Auth::user()->id }}")
             }
         });
     </script>
