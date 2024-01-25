@@ -138,6 +138,10 @@ return [
                 'icon_class'   => 'voyager-home',
                 'target_blank' => true,
             ],
+            'Limipar DB' => [
+                'route'      => '/admin/clear',
+                'icon_class' => 'voyager-trash',
+            ],
             'voyager::generic.logout' => [
                 'route'      => 'voyager.logout',
                 'icon_class' => 'voyager-power',

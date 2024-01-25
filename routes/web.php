@@ -21,17 +21,17 @@ Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
 
     Route::get('/clear', function () {
-        // App\Evento::truncate();
-        // App\Contacto::truncate();
-        // App\Grupo::truncate();       
-        // $miwhats = App\Whatsapp::all();
-        // foreach ($miwhats as $value) {
-        //     Storage::disk('public')->deleteDirectory($value->slug);
-        // }        
+        App\Evento::where('user_id', Auth::user()->id)->truncate();
+        App\Contacto::where('user_id', Auth::user()->id)->truncate();
+        App\Grupo::where('user_id', Auth::user()->id)->truncate();       
+        $miwhats = App\Whatsapp::where('user_id', Auth::user()->id)->get();
+        foreach ($miwhats as $value) {
+            Storage::disk('public')->deleteDirectory($value->slug);
+        }        
         // Storage::disk('public')->deleteDirectory('qr');
 
-        // App\Whatsapp::truncate();
-        // App\Descarga::truncate();
+        // App\Whatsapp::where('user_id', Auth::user()->id)->truncate();
+        // App\Descarga::where('user_id', Auth::user()->id)->truncate();
         // App\Plantilla::truncate();
         // $miuser = App\Models\User::all();
         // foreach ($miuser as $value) {
